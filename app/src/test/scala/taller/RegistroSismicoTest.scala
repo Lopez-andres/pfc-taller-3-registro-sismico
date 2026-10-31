@@ -66,6 +66,41 @@ class RegistroSismicoTest extends AnyFunSuite {
     assert(paresCercanos(registro, 5.0).forall { case (a, b) => a != b })
   }
 
+  // test del punto 1 agregados
+  val cauca: List[Sismo] = List(
+    Sismo(Fecha(2026, 1), "Cauca", 3.0, 10),
+    Sismo(Fecha(2026, 2), "Huila", 9.0, 10),
+    Sismo(Fecha(2026, 3), "Cauca", 5.0, 10),
+    Sismo(Fecha(2026, 4), "Cauca", 4.0, 10)
+  )
+
+  test("propia fuertes: un umbral negativo deja pasar los siete, en orden") {
+    assert(fuertes(registro, -1.0) == List("Valle", "Santander", "Valle", "Choco", "Santander", "Valle", "Choco"))
+  }
+
+  test("propia enRegion: respeta el orden de aparición, no el de magnitud") {
+    assert(enRegion(cauca, "Cauca") == List(3.0, 5.0, 4.0))
+  }
+
+  test("propia paresCercanos: la diferencia exacta de 0.2 cuenta (a lo sumo)") {
+    assert(paresCercanos(registro, 0.2) == List(("Valle", "Santander")))
+  }
+
+  test("propia paresCercanos: con dif 0.0 emparejan magnitudes iguales de regiones distintas") {
+    val iguales = List(
+      Sismo(Fecha(2026, 1), "A", 4.0, 10),
+      Sismo(Fecha(2026, 1), "B", 4.0, 10),
+      Sismo(Fecha(2026, 1), "C", 4.0, 10),
+    )
+
+    assert(paresCercanos(iguales, 0.0) == List("A", "B"))
+  }
+
+  test("propia paresCercanos: con una sola región, o sin registro, no hay parejas") {
+    assert(paresCercanos(cauca.filter(x => x.region == "Cauca"), 5.0) == List())
+    assert(paresCercanos(vacio, 5.0) == List())
+  }
+
   // Punto 2 -------------------------------------------------------------------
 
   test("porRegion: agrupa los siete sismos en tres regiones") {
@@ -89,6 +124,32 @@ class RegistroSismicoTest extends AnyFunSuite {
 
   test("magnitudMaxima: las regiones ausentes no aparecen") {
     assert(!magnitudMaxima(registro).contains("Amazonas"))
+  }
+
+  test("propia porRegion: el registro vacío da el mapa vacío usando PorRegion") {
+    assert(porRegion(vacio) == Map())
+  }
+
+  test("propia porRegion: cada grupo conserva sus sismos en orden de aparicion") {
+    assert(porRegion(registro)("Choco") ==
+      List(Sismo(Fecha(2025, 4), "Choco", 6.0, 40), Sismo(Fecha(2025, 6), "Choco", 3.1, 20)))
+  }
+
+  test("propia conteoPorRegion: los conteos suman el tamaño del registro") {
+    assert(conteoPorRegion(registro).values.sum == registro.length)
+    assert(conteoPorRegion(cauca) == Map("Cauca" -> 3, "Huila" -> 1))
+  }
+
+  test("propia magnitudMaxima: el máximo puede estar en medio de la lista") {
+    assert(magnitudMaxima(cauca) == Map("Cauca" -> 5.0, "Huila" -> 9.0))
+  }
+
+  test("propia punto 2: el resultado no depende del orden del registro") {
+    assert(conteoPorRegion(registro.reverse) == conteoPorRegion(registro))
+    assert(magnitudMaxima(registro.reverse) == magnitudMaxima(registro))
+    assert(porRegion(registro.reverse).map {
+      case (k, v) => (k, v.toSet) } ==
+      porRegion(registro).map { case (k, v) => (k, v.toSet) })
   }
 
   // Punto 3 -------------------------------------------------------------------
