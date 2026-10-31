@@ -92,8 +92,7 @@ class RegistroSismicoTest extends AnyFunSuite {
       Sismo(Fecha(2026, 1), "B", 4.0, 10),
       Sismo(Fecha(2026, 1), "C", 4.0, 10),
     )
-
-    assert(paresCercanos(iguales, 0.0) == List("A", "B"))
+    assert(paresCercanos(iguales, 0.0) == List(("A", "B"), ("A","C"), ("B", "C")))
   }
 
   test("propia paresCercanos: con una sola región, o sin registro, no hay parejas") {
