@@ -14,12 +14,11 @@ Llene esta tabla con el nombre completo y el código de cada integrante. Es
 parte de la entrega: si falta alguno, la entrega se sanciona con el 20 % de
 la nota.
 
-| Nombre completo | Código |
-|---|---|
-| | |
-| | |
-| | |
-| | |
+| Nombre completo            | Código       |
+|----------------------------|--------------|
+| Andrés Mauricio Peña López | 2380335-2724 |
+| Luz Amelia Ibarguen        | 2380404-2724 |
+| Katherine López Unas       | 2380339-2724 |
 
 ## Cómo está organizado el proyecto
 
