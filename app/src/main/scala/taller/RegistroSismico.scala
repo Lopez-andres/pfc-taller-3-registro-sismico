@@ -35,7 +35,6 @@ class RegistroSismico {
     def cercanas(a: String, b: String) : Boolean =
       r.exists(s1 => s1.region == a &&
       r.exists(s2 => s2.region == b &&
-      // Math.abs(s1.magnitud - s2.magnitud) <= dif + 1e-9))
       Math.abs(s1.magnitud - s2.magnitud) <= dif + 1e-9))
 
     (for {

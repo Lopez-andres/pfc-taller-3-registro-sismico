@@ -99,8 +99,8 @@ Resultado: `List("Santander", "Choco", "Valle")`.
 ### Definición del algoritmo
 
 ```scala
-def enRegion(r: Registro, region: String): List[Double] = 
-for (s <- r if s.region == region) yield s.magnitud
+  def enRegion(r: Registro, region: String): List[Double] = 
+  for (s <- r if s.region == region) yield s.magnitud
 ```
 
 * `enRegion` devuelve las magnitudes de los sismos de una región, en el orden del registro.
@@ -110,8 +110,9 @@ for (s <- r if s.region == region) yield s.magnitud
 ### Traducción del `for`
 
 ```Scala 
-r.withFilter(s => s.region == region).map(s => s.magnitud)
+  r.withFilter(s => s.region == region).map(s => s.magnitud)
 ```
+
 ### Seguimiento de la ejecución 
 
 Con `enRegion(registro, "Valle")` pasan el `if` los sismos 1, 3 y 6, y el resultado es 
@@ -259,7 +260,7 @@ Las tres consultas son expresiones `for` que el compilador reescribe como `map`,
 generador exterior, y el rango `(i + 1) until n` evita parejas repetidas. 
 
 
-# Punto 2. Agrupar con `mapas`
+# Punto 2. Agrupar con mapas
 
 ## Definición del algoritmo 
 
