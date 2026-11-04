@@ -218,6 +218,35 @@ class RegistroSismicoTest extends AnyFunSuite {
     assert(replicasSensibles(3.0, 3.0) == List())
   }
 
+  val nuevo: List[Sismo] = List(
+    Sismo(Fecha(2026, 1), "Cauca", 4.4, 12),
+    Sismo(Fecha(2026, 2), "Huila", 5.8, 70),
+    Sismo(Fecha(2026, 2), "Cauca", 6.2, 33),
+    Sismo(Fecha(2026, 3), "Huila", 3.9, 15),
+    Sismo(Fecha(2026, 3), "Cauca", 3.3, 20),
+  )
+
+  test("replicas: primeros cuatro valores de una magnitud 7.0") {
+    assert(replicas(7.0).take(4).toList == List(7.0, 5.6, 4.48, 3.58))
+  }
+
+  test("replicas: primeros seis valores de una magnitud 5.5") {
+    assert(replicas(5.5).take(6).toList == List(5.5, 4.4, 3.52, 2.82, 2.25, 1.8))
+  }
+
+  test("replicas: el primer elemento es la magnitud redondeada a dos decimales"){
+    assert(replicas(3.456).head == 3.46)
+  }
+
+  test("replicas: la secuencia es infinita y termina estancada en 0.0"){
+    assert(replicas(1.0).drop(30).take(3).toList == List(0.0, 0.0, 0.0))
+  }
+
+  test("replicas: ningun valor es mayor que el anterior"){
+    val valores = replicas(8.0).take(10).toList
+    assert(valores.zip(valores.tail).forall {case (a, b) => b <= a })
+  }
+
   // Punto 5 -------------------------------------------------------------------
 
   test("informe: el resumen de las tres regiones") {
@@ -245,4 +274,56 @@ class RegistroSismicoTest extends AnyFunSuite {
     assert(informe(registro, 3.0)("Choco").replicas ==
       replicasSensibles(6.0, 3.0).length)
   }
+
+  test("informe: dos regiones con mínimo 4.0"){
+    assert(informe(nuevo, 4.0) ==
+    Map("Cauca" -> Resumen(3, 6.2, 2), "Huila" -> Resumen (2, 5.8, 2)))
+  }
+
+  test("replicasSensibles: todas superan el minimo y van en orden decreciente"){
+    val r =replicasSensibles(9.0 , 2.0)
+    assert(r.forall(_> 2.0) && r == r.sorted.reverse)
+  }
+
+  test("replicasSensibles: es el comienzo de replicas") {
+    val r = replicasSensibles(6.0, 2.0)
+    assert(r == replicas(6.0).take(r.length).toList)
+  }
+  test("replicasSensibles: un minimo mas alto nunca da mas replicas"){
+    assert(replicasSensibles(8.0, 5.0).length <= replicasSensibles(8.0, 2.0).length)
+  }
+
+  test("replicasSensibles: con minimo negativo termina y no incluye ceros"){
+    val r = replicasSensibles(1.0, -1.0)
+    assert(r.length == 24 && r.head == 1.0 && r.last == 0.01)
+  }
+  test("replicasSensibles: magnitud 9.0 con minimo 4.0"){
+    assert(replicasSensibles(9.0, 4.0) == List(9.0, 7.2, 5.76, 4.61))
+  }
+
+  test("replicasSensibles: con minimo 0.0 todos los valores son positivos"){
+    val r = replicasSensibles(5.0, 0.0)
+    assert(r.length == 31 && r.forall(_ > 0))
+  }
+
+  test("informe: tiene las mismas regiones que porRegion"){
+    assert(informe(nuevo, 4.0).keySet == porRegion(nuevo).keySet)
+  }
+
+  test("informe: el conteo y la maxima coinciden con los del punto 2"){
+    val i = informe(nuevo, 4.0)
+    assert(i.map { case (r, x) => (r, x.sismos)} == conteoPorRegion(nuevo))
+    assert(i.map { case (r, x) => (r, x.maxima)} == magnitudMaxima(nuevo))
+  }
+  test("informe: no depende del orden del registro"){
+    assert(informe(nuevo.reverse, 4.0) == informe(nuevo, 4.0))
+  }
+  test("informe: con minimo muy alto no hay replicas sensibles"){
+    assert(informe(nuevo, 10.0) == Map("Cauca" -> Resumen(3, 6.2, 0), "Huila" -> Resumen(2, 5.8, 0)))
+  }
+  test("informe: una sola region con un solo sismo"){
+    val unico = List(Sismo(Fecha(2026, 5), "Narino", 4.5, 10))
+    assert(informe(unico, 4.0) == Map("Narino" -> Resumen(1, 4.5, 1)))
+  }
 }
+
