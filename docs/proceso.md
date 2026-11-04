@@ -331,3 +331,356 @@ println(rs.conteoPorRegion(List()))   // Map()
 
 `porRegion` agrupa con `groupBy`, y `conteoPorRegion` y `magnitudMaxima` transforman cada entrada con 
 `map` sin recorrer listas a mano. Ninguna usa `for`, así que su ejecución se explica con `groupBy` y `map`.
+
+# Punto 4. `replicas` y `replicasSensibles`
+
+Después de un sismo pueden producirse otros movimientos de menor magnitud, conocidos como réplicas. Para representar este
+comportamiento se implementan las dos funciones: `replicas` genera una secuencia de magnitudes, y `replicasSensibles`
+selecciona las que superan un mínimo establecido.
+
+## 4.1 Código `replicas`
+
+```Scala
+  def redondear(x: Double): Double = Math.round(x * 100.0) / 100.0
+
+  /** La secuencia infinita que empieza en la magnitud y multiplica por 0.8. */
+  def replicas(magnitud: Double): LazyList[Double] =
+    redondear(magnitud) #:: replicas(magnitud * 0.8)
+
+```
+La función genera una secuencia infinita que comienza con la magnitud del sismo original. Cada réplica
+siguiente corresponde al 80% de la magnitud anterior y se presenta con dos decimales.
+
+Para generar esta secuencia se utiliza `LazyList`, que permite calcular los elementos únicamente cuando se necesitan.
+
+### Explicación del código
+
+* `redondear(magnitud)`: deja la magnitud con solo dos decimales: por ejemplo `3.584` pasa a `3.58`. Esta función ya estaba proporcionada
+en el material del profesor y hace falta para dar cada magnitud con la precisión que pide el enunciado.
+* `#::`: agrega un elemento al inicio de una `LazyList`, dejando pendiente el cálculo de la secuencia siguiente.
+* `replicas(magnitud * 0.8)`: realiza la llamada recursiva utilizando el 80% de la magnitud actual.
+
+Es importante que la llamada recursiva utilice la magnitud sin redondear. De esta manera se conserva la precisión del
+cálculo y se evita que la secuencia se estanque en valores pequeños: si se redondeara en cada paso, `0.02 * 0.8 = 0.016` volvería a redondearse a `0.02`
+ y las réplicas quedarían fijas en ese valor.
+
+### Funcionamiento paso a paso
+
+Para observar el comportamiento de la función se utiliza una magnitud inicial de `7.0`.
+
+| Paso | Operación | Valor exacto | Se muestra | ¿Lo calcula `take(4)`? |
+|---|---|---|---|---|
+| 1 | Magnitud inicial | `7.0` | `7.0` | sí |
+| 2 | `7.0 * 0.8` | `5.6` | `5.6` | sí |
+| 3 | `5.6 * 0.8` | `4.48` | `4.48` | sí |
+| 4 | `4.48 * 0.8` | `3.584` | `3.58` | sí |
+| 5 | `3.584 * 0.8` | `2.8672` | `2.87` | no |
+
+### Ejemplo de uso
+
+```Scala
+replicas(7.0).take(4).toList
+```
+### Resultado:
+
+```Scala
+List(7.0, 5.6, 4.48, 3.58)
+
+```
+`take(4)` limita la secuencia a cuatro elementos y `toList` permite obtenerlos como una lista convencional.
+
+### Diagrama de llamados
+
+```mermaid
+sequenceDiagram
+    participant Main
+    participant R as replicas(7.0)
+
+
+    Main->>R: Solicita 4 elementos
+    R-->>Main: 7.0
+    R-->>Main: 5.6
+    R-->>Main: 4.48
+    R-->>Main: 3.58
+    Main->>Main: toList
+```
+
+### Diagrama de celda
+
+Muestra qué parte de la secuencia existe después de `take(4)`.
+
+```mermaid
+flowchart LR
+   A["7.0<br/>calculada"] --> B["5.6<br/>calculada"]
+   B --> C["4.48<br/>calculada"]
+   C --> D["3.58<br/>calculada"]
+   D --> E["resto de la secuencia<br/>pendiente"]
+```
+
+## 4.2 Función `replicasSensibles`
+
+Esta función selecciona las réplicas cuya magnitud supera un mínimo establecido. Recibe la magnitud inicial del sismo y el
+valor mínimo, y devuelve una lista con las réplicas que cumplen esa condición.
+
+### Código
+
+```Scala
+  /** Las réplicas mientras superen el mínimo, incluida la primera. */
+  def replicasSensibles(magnitud: Double, minimo: Double): List[Double] =
+     replicas(magnitud).takeWhile(m =>m > minimo && m > 0).toList
+```
+
+### Explicación del código
+
+* `replicas(magnitud)`: genera la secuencia de magnitud del sismo.
+* `takeWhile`: conserva los elementos mientras cumplan la condición y detiene el recorrido cuando encuentra el primero que no la cumple.
+* `m > minimo`: comprueba que la magnitud sea estrictamente superior al mínimo establecido.
+* `m > 0`: solo tiene efecto cuando el mínimo es negativo. En ese caso toda réplica superaría el mínimo y la secuencia,
+que decrece hacia cero, nunca fallaría la condición: con `m > 0` el recorrido se detiene cuando las réplicas se redondean a `0.0`.
+* `toList`: convierte las magnitudes seleccionadas en una lista.
+
+* `takeWhile` se usa en lugar de`filter` porque `filter` seguiría buscando elementos en el resro de la secuencia 
+infinita, mientras que `takeWhile` se detiene en el primero que no cumple.
+
+### Funcionamiento paso a paso
+
+Se utiliza como ejemplo un sismo de magnitud 7.0 y un mínimo de 4.0.
+
+| `Paso` | `Magnitud` | `¿Supera el mínimo?` | `Acción` |
+|---|---|---|---|
+| 1 | 7.0 | Sí | Se conserva. |
+| 2 | 5.6 | Sí | Se conserva. |
+| 3 | 4.48 | Sí | Se conserva. |
+| 4 | 3.58 | No | Se detiene el recorrido. |
+
+
+### Ejemplo de uso
+
+```Scala
+replicasSensibles(7.0, 4.0)
+```
+Resultado:
+
+```Scala
+List(7.0, 5.6, 4.48)
+```
+Si la magnitud inicial no supera el mínimo, como ocurre en el siguiente ejemplo:
+
+```Scala
+replicasSensibles(3.0, 4.0)
+```
+Resultado:
+
+```Scala
+List()
+```
+### Diagrama de llamados
+
+```mermaid
+sequenceDiagram
+    participant Main as replicasSensibles(7.0, 4.0)
+    participant W as takeWhile
+    participant R as replicas(7.0)
+
+    Main->>W: Solicita las réplicas sensibles
+    W->>R: Solicita la primera magnitud
+    R-->>W: 7.0 (cumple)
+    W->>R: Solicita la segunda magnitud
+    R-->>W: 5.6 (cumple)
+    W->>R: Solicita la tercera magnitud
+    R-->>W: 4.48 (cumple)
+    W->>R: Solicita la cuarta magnitud
+    R-->>W: 3.58 (no cumple)
+    W-->>Main: Finaliza la selección
+    Main->>Main: toList
+```
+### Diagrama de decisión
+Cada vuelta del ciclo pide réplica y decide si se conserva o si el recorrido termina.
+
+```mermaid
+flowchart TD
+   A["Pedir la siguiente réplica de replicas(7.0)"] --> B{"¿m > 4.0 y m > 0?"}
+   B -- sí --> C["consérvala en el resultado"]
+   C --> A
+   B -- no --> D["Detener: las siguientes no se calculan"]
+   D --> E["toList: List(7.0, 5.6, 4.48)"]
+```
+
+## 4.3 Evaluación perezosa de LazyList
+La secuencia generada por `replicas` es infinita, por lo que no sería conveniente calcular todos sus elementos desde el comienzo.
+
+Para solucionar esto se utiliza `LazyList`, que permite aplazar los cálculos hasta que se solicitan los elementos.
+
+En esta implementación: 
+
+* `replicas(7.0)` crea la secuencia sin recorrerla.
+* `take(4)` limita la cantidad de elementos solicitados.
+* `toList`: fuerza la evaluación de los cuatro elementos.
+
+Por ejemplo, al ejecutar `replicasSensibles(7.0, 4.0)`, se conservan tres magnitudes, pero se evalúa una cuarta para comprobar que ya no supera el mínimo.
+Esto permite trabajar con una secuencia infinita sin necesidad de recorrerla completamente.
+
+Se comprobó con un contador sobre una copia de `replicas`:
+
+| `llamada` | `Devuelve` | `Magnitudes calculadas` |
+|---|---|---|
+| `replicas(7.0)`, recién creada | nada | 0 |
+| `replicas(7.0).take(4)` | 4 | 4 |
+| `replicasSensibles(7.0, 4.0)` | 3 | 4 |
+| `replicasSensibles(9.0, 4.0)` | 4 | 5 |
+| `replicasSensibles(3.0, 4.0)` | 0 | 1 |
+
+### Diagrama de llamados  `replicas` y `replicasSensibles`
+
+```mermaid
+sequenceDiagram
+    participant Main
+    participant S as replicasSensibles
+    participant W as takeWhile
+    participant R as replicas(7.0)
+
+    Main->>S: replicasSensibles(7.0, 4.0)
+    S->>R: crea la secuencia infinita
+    R-->>S: LazyList sin elementos calculados
+    S->>W: Conserva mientras m > 4.0 y m > 0
+    loop mientras la réplica supere el mínimo
+        W->>R: pide la siguiente réplica
+        R-->>W: 7.0, 5.6 y 4.48 (cumplen)
+    end
+    W-->>R: pide la siguiente réplica
+    R-->>W: 3.58 (no cumple)
+    W-->>S: finaliza
+    S-->>S: toList
+    S-->>Main: List(7.0, 5.6, 4.48)
+```
+
+## Conclusión del punto 4
+
+`replicas` construye una secuencia infinita de réplicas con `#::`.
+Como `LazyList` solo calcula los elementos que se le piden, el programa no se queda en un ciclo.
+
+`replicasSensibles` toma de esa secuencia, con `takeWhile`, las réplicas que son mayores que el mínimo y 
+que 0 y las convierte en una `List` con `toList`. 
+Las réplicas no aumentan y terminan en 0, así que en algún momento una de ellas incumple la condición: ahí `takeWhile` se detiene y el resultado es una lista finita. La
+condición `m > 0` asegura que el cálculo termine incluso cuando el mínimo es negativo.
+
+
+# Punto 5. `informe`
+La función `informe` resume los sismos de cada región en una ficha con tres datos: cuántos sismos se
+registraron, cuál fue la mayor magnitud y cuántas réplicas sensibles se esperan del sismo más fuerte de esa región. La ficha
+es un `Resumen`, y el resultado es un mapa que asocia cada región con su ficha.
+
+
+## 5.1 Función `informe`
+
+```Scala
+  def informe(r: Registro, minimo: Double): Map[String, Resumen] ={
+     val conteo = conteoPorRegion(r)
+     val maximas = magnitudMaxima(r)
+     for((region, n) <- conteo)
+       yield (region, Resumen(n, maximas(region), replicasSensibles(maximas(region), minimo).length))
+  }
+```
+
+### Explicación del código
+
+* `conteoPorRegion(r)`: obtiene cuántos sismos hubo en cada región del punto 2.
+* `magnitudMaxima(r)`: obtiene la mayor magnitud de cada región del punto 2. Ambos mapas salen de `porRegion(r)`, por lo que tienen las mismas regiones y
+ `maximas(region)` nunca lanza excepción.
+* `for ((region, n) <- conteo) yield...`: recorre cada región con su conteo y construye su ficha. Como el resultado son parejas `(region, Resumen(...))`,
+ el `for` produce un `Map[String, Resumen]`.
+* `replicasSensibles(maximas(region), minimo).length`: calcula las réplicas sensibles del sismo más fuerte de la región y
+   cuenta cuántas hay (punto 4).
+
+## 5.2 En qué se traduce la expresión `for`
+
+El `for` de `informe` tiene un solo generador, así que por la tabla de inicio se traduciría a `map`. Pero este generador 
+usa un patrón, `(region, n)`, y en ese caso el compilador agrega antes un `withFilter` que comprueba que cada entrada lo cumpla. Por eso 
+queda un `withFilter` seguido de un `map`.
+
+El siguiente bloque **no forma parte del código**: es una versión simplificada de lo que genera el compilador.
+
+```Scala
+ // Generado por el compilador a partir del `for` de `informe` (no está en el archivo)
+conteo
+.withFilter { case (region, n) => true; case _ => false }
+.map {case (region, n) =>
+  (region, Resumen(n, maximas(region), replicasSensibles(maximas(region), minimo).length))}
+```
+
+* `map` corresponde a la regla de un generador con `yield`.
+* `withFilter` aparece porque el generador usa un patrón `(region, n)` y el compilador comprueba que cada entrada lo cumpla.
+Toda entrada de un `Map` es una pareja, de modo que la comprobación siempre es verdadera y no descarta nada.
+
+## 5.3 Funcionamiento paso a paso
+
+Se utiliza como ejemplo un registro de cinco sismos en dos regiones y un mínimo de `4.0`.
+
+```Scala
+val nuevo = List(
+  Sismo(Fecha(2026, 1), "Cauca", 4.4, 12),
+  Sismo(Fecha(2026, 2), "Huila", 5.8, 70),
+  Sismo(Fecha(2026, 2), "Cauca", 6.2, 33),
+  Sismo(Fecha(2026, 3), "Huila", 3.9, 15),
+  Sismo(Fecha(2026, 3), "Cauca", 3.3, 20))
+
+```
+
+| Región | Sismos | Magnitud máxima | Réplicas que superan 4.0 | cuántas | Primera que falla |
+|---|---|---|---|---|---|
+| `Cauca` | 3 | `6.2` | `6.2, 4.96` | 2 | `3.97` |
+| `Huila` | 2 | `5.8` | `5.8, 4.64` | 2 | `3.71` |
+
+### Ejemplo de uso
+
+```Scala
+informe(nuevo, 4.0)
+```
+### Resultado:
+
+```Scala
+Map("Cauca" -> Resumen(3, 6.2, 2), "Huila" -> Resumen(2, 5.8, 2))
+
+```
+Si el registro está vacío, `porRegion` devuelve un mapa vacío, el `for` no tiene entradas que recorrer y el resultado es `Map()`.
+
+### Diagrama de flujo de datos
+Muestra cómo se combinan los puntos anteriores hasta formar el mapa final.
+
+```mermaid
+flowchart TD
+   A["nuevo: Registro"] --> B["porRegion(nuevo)"]
+   B --> C["conteoPorRegion: Cauca 3, Huila 2"]
+   B --> D["magnitudMaxima: Cauca 6.2, Huila 5.8"]
+   C --> E["for (region, n) en conteo"]
+   D --> E
+   E --> F["replicasSensibles(maxima, 4.0).length"]
+   F --> G["Resumen(n, maxima, longitud)"]
+   G --> H["Map[String, Resumen]"]
+
+```
+### Diagrama de llamados
+
+```mermaid
+sequenceDiagram
+    participant I as informe(nuevo, 4.0)
+    participant C as conteoPorRegion
+    participant M as magnitudMaxima
+    participant S as replicasSensibles
+
+    I->>C: nuevo
+    C-->>I: Map(Cauca -> 3, Huila -> 2)
+    I->>M: nuevo
+    M-->>I: Map(Cauca -> 6.2, Huila -> 5.8)
+    loop por cada región de conteo
+        I->>S: (maximas(region), 4.0)
+        S-->>I: List(...) y su longitud
+    end
+    Note over I: Cauca: 2 réplicas, Huila: 2 réplicas
+    I-->>I: Map(Cauca -> Resumen(3, 6.2, 2), Huila -> Resumen(2, 5.8, 2))
+```
+
+## Conclusión del punto 5
+`informe` reúne los resultados de los puntos anteriores. Con un `for` recorre el mapa de `conteoPorRegion` y,
+para cada región, construye un `Resumen` con su número de sismos, su magnitud máxima (`magnitudMaxima`) y cuántas réplicas 
+sensibles se esperan del sismo más fuerte de la región (`replicasSensibles`). El resultado es un `Map` con una entrada por cada región del registro.

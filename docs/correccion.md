@@ -173,3 +173,273 @@ con $r$; como conjunto de sismos por región, el resultado es el mismo. $\blacks
 `porRegion`, `conteoPorRegion` y `magnitudMaxima` coinciden con su especificación para toda región $g \in \text{Reg}(r)$,
 y `.max` nunca se aplica a una lista vacía. Además, `conteoPorRegion` y `magnitudMaxima` devuelven el mismo `Map` para 
 cualquier reordenamiento del registro, porque la suma y el máximo son conmutativos.
+
+## Punto 4. `replicas` y `replicasSensibles`
+
+**Notación.** $r_k$ ("r sub k") es la réplica de la posición $k$, y la primera posición es la $0$: $\rightarrow$ 
+se entiende que "evalúa a" y $\texttt{==}$, "es igual a".
+
+### `replicas`: la secuencia de réplicas
+
+Sea $m$ la magnitud inicial. Cada réplica se obtiene reduciendo en un 20% la magnitud anterior, sin redondear el valor
+que se usa para calcular la siguiente; el resultado que se muestra en cada posición sí se redondea a dos decimales.
+
+Sea $\operatorname{red}(x) = \dfrac{\operatorname{round}(100\,x)}{100}$ la función `redondear`. Las réplicas de una 
+magnitud $m$ son la secuencia infinita:
+
+$$
+R(m) = (r_0, r_1, r_2, \dots), \qquad r_k = \operatorname{red}(0.8^{k}\, m)
+$$
+
+Sea $P_{\text{replicas}}$ el programa:
+
+```scala
+ def replicas(magnitud: Double): LazyList[Double] =
+    redondear(magnitud) #:: replicas(magnitud * 0.8)
+```
+
+Para una secuencia perezosa, la celda $\langle x \mid xs \rangle$ tiene cabeza $x$ y cola $xs$, y la cola solo se calcula al pedirla. El razonamiento se hace en aritmética real; 
+en `Double`, los productos sucesivos pueden diferir de $0.8^k\, m$ en los últimos bits, sin afectar que la secuencia tienda a cero.
+
+**Lema 2.** Para todo $m$ y todo $k \geq 0$, el elemento de posición $k$ de $P_{\text{replicas}}(m)$ es $r_k = \operatorname{red}(0.8^{k}\, m)$.
+
+**Demostración.** Por inducción sobre $k$, con la propiedad enunciada para todo $m$.
+
+**Caso base:** $k = 0$
+
+$$
+P_{\text{replicas}}(m) \rightarrow \langle \operatorname{red}(m) \mid P_{\text{replicas}}(0.8\, m)\rangle
+$$
+
+La cabeza es $\operatorname{red}(m) = \operatorname{red}(0.8^{0}\, m) = r_0$. Por lo tanto, la propiedad se cumple para la 
+posición inicial.
+
+**Caso de inducción:** $k = j + 1$, $j \geq 0$. La hipótesis de inducción (HI) dice que, para 
+cualquier magnitud $m'$, el elemento de posición $j$ de $P_{\text{replicas}}(m')$ es $\operatorname{red}(0.8^{j}\, m')$.
+
+El elemento de posición $j + 1$ de $P_{\text{replicas}}(m)$ es el de posición $j$ de su cola, que por la definición es $P_{\text{replicas}}(0.8\, m)$.
+Aplicando la HI con $m' = 0.8\, m$:
+
+$$
+\rightarrow \operatorname{red}(0.8^{j} \cdot 0.8\, m) = \operatorname{red}(0.8^{j+1}\, m) = r_{j+1}
+$$
+
+Por lo tanto, la propiedad también se cumple para la posición $j + 1$.
+
+Concluimos por inducción que, para todo $m$ y todo $k \geq 0$, el elemento de posición $k$ de $P_{\text{replicas}}(m)$ es $r_k$.
+$\blacksquare$
+
+**Corolario (pereza).** Para todo $n$, $P_{\text{replicas}}(m).\mathrm{take}(n).\mathrm{toList}$ devuelve $(r_0, \dots, r_{n-1})$ y solo calcula $n$ celdas. 
+La demostración nunca usa toda la secuencia, que es infinita, sino sus primeros $n$ elementos, y por eso `take(4)` termina.
+
+**Ejemplo.** Para $m = 7.0$, $P_{\text{replicas}}(7.0).\mathrm{take}(4)$ devuelve $(7.0,\ 5.6,\ 4.48,\ 3.58)$, que corresponden a 
+$\operatorname{red}(7.0),\ \operatorname{red}(5.6),\ \operatorname{red}(4.48)$ y  $\operatorname{red}(3.584)$.
+
+### `replicasSensibles`: especificación
+
+Aquí $\mu$ ("mu") es el mínimo, $\land$ se lee "y" y $\neg$ se lee "no".
+
+Sea $\mu$ el mínimo y sea $p_\mu$ el predicado que usa el programa:
+
+$$
+p_\mu(x) \equiv x > \mu \ \land\ x > 0 
+$$
+
+Si $\mu \geq 0$, entonces $x > \mu$ implica $x > 0$ y $p_\mu(x)$ equivale a $x > \mu$, que es exactamente la condición del enunciado.
+La cláusula $x > 0$ solo interviene cuando $\mu < 0$: en ese caso la lectura literal del enunciado exigiría una lista infinita, y se decidió
+cortar cuando la réplica llega a cero.
+
+La especificación $f(m, \mu)$ es el prefijo más largo de $R(m)$ cuyos elementos cumplen $p_\mu$:
+
+$$
+f(m, \mu) = (r_0, \dots, r_{j-1}), \qquad j = \min\{\, k \in \mathbb{N} : \neg\, p_\mu(r_k) \,\}
+$$
+
+Sea $P_{\text{sensibles}}$ el programa: 
+
+```scala
+  def replicasSensibles(magnitud: Double, minimo: Double): List[Double] =
+    replicas(magnitud).takeWhile(m => m > minimo && m > 0).toList
+```
+Para una secuencia perezosa $\langle x \mid xs \rangle$ con cabeza $x$ y cola $xs$, `takeWhile` cumple
+estas ecuaciones, donde $\mathrm{Nil}$ es la lista vacía y $::$ agrega un elemento al inicio:
+$$
+\mathrm{takeWhile}_p(\langle x \mid xs \rangle) = \begin{cases}
+x :: \mathrm{takeWhile}_p(xs) & \text{si } p(x) \\ 
+\mathrm{Nil} & \text{si } \neg\, p(x)
+\end{cases}
+$$
+
+### Lema 3: la secuencia deja de cumplir $p_\mu$
+
+**Enunciado.** Para todo $m$ y todo $\mu$ existe $k$ tal que $\neg\, p_\mu(r_k)$.
+Por tanto, el $j$ de la especificación existe.
+
+**Demostración.**
+
+- Si $m \leq 0$: $r_0 = \operatorname{red}(m) \leq 0$, de modo que $r_0 > 0$ es falso y $\neg\, p_\mu(r_0)$.
+- Si $m > 0$: como $0 <0.8 < 1$, se tiene $0.8^k\, m \to 0$. Sea $k > \log_{0.8}(0.005 / m)$. Entonces $0.8^k\, m < 0.005$,
+así que $100 \cdot 0.8^k\, m < 0.5$ y $\operatorname{round}(100 \cdot 0.8^k\, m) = 0$.
+Resulta $r_k = 0$, y $r_k > 0$ es falso, luego $\neg\, p_\mu(r_k)$.
+
+En ambos casos existe una posición en la que la condición falla. Por tanto, la selección termina y el índice $j$ de la 
+especificación está definido.
+
+$\blacksquare$
+
+### Teorema 1: `replicasSensibles` cumple su especificación
+
+$$
+\forall m, \mu \in \mathbb{R} : P_{\text{sensibles}}(m, \mu) == f(m, \mu)  
+$$
+
+**Propiedad.** Sea $s= (s_0, s_1, \dots)$ una secuencia perezosa y $p$ un predicado. Si $p(s_i)$ para todo $i < n$ y 
+$\neg\, p(s_n)$, entonces
+
+$$
+\mathrm{takeWhile}_p(s) == (s_0, \dots, s_{n-1})
+$$
+
+La demostración es por inducción sobre $n$.
+
+**Caso base:** $n = 0$. Como $\neg\, p(s_0)$,
+
+$$
+\mathrm{takeWhile}_p(s) \rightarrow \mathrm{Nil} == ()
+$$
+que es el prefijo vacío.
+
+**Caso de inducción.** $n = k + 1$. La hipótesis de inducción (HI) dice que la propiedad vale para cualquier secuencia cuyo 
+primer fallo esté en la posición $k$. Como $k + 1 > 0$, se cumple $p(s_0)$ y entonces
+
+$$
+\mathrm{takeWhile}_p(s) \rightarrow s_0 :: \mathrm{takeWhile}_p(\langle s_1, s_2, \dots \rangle)
+$$
+
+La cola $(s_1, s_2, \dots)$ cumple $p$ en sus primeras $k$ posiciones y falla en la $k$-ésima. Por la HI:
+
+$$
+\rightarrow s_0 :: (s_1, \dots, s_k) == (s_0, \dots, s_k)
+$$
+que es el prefijo de longitud $k +1$. Concluimos por inducción que la propiedad vale para todo $n$.
+
+**Aplicación.** Por el Lema 2, la secuencia que produce `replicas(m)` es $s = R(m)$. 
+Se toma $p = p_\mu$. Por el Lema 3 existe
+$j = \min\{k : \neg\, p_\mu(r_k)\}$, y por la propiedad:
+
+$$
+\mathrm{takeWhile}_{p_\mu}(R(m)) == (r_0, \dots, r_{j-1}) = f(m, \mu)
+$$
+Con el modelo de sustitución:
+
+$$
+P_{\text{sensibles}}(m, \mu) \rightarrow R(m).\mathrm{takeWhile}(p_\mu).\mathrm{toList}
+\rightarrow \mathrm{takeWhile}_{p_\mu}(R(m)).\mathrm{toList}
+\rightarrow (r_0, \dots, r_{j-1}) == f(m, \mu)
+$$
+
+Como `toList` solo convierte ese prefijo finito en una `List`, $P_{\text{sensibles}}(m, \mu) == f(m, \mu)$. $\blacksquare$
+
+**Sobre la pereza.** La demostración solo examina $r_0, \dots, r_j$, es decir, $j +1$ elementos.
+La propiedad se enuncia sobre los primeros elementos y no sobre toda la secuencia, que es infinita y nunca se materializa.
+
+**Ejemplo.** Para $m = 7.0$ y $\mu = 4.0$ las réplicas son $7.0,\ 5.6,\ 4.48,\ 3.58,\ \dots$. El primer fallo está en $r_3 = 3.58$,
+así que $j = 3$ y $f(7.0, 4.0) = (7.0,\ 5.6,\ 4.48)$, valor que devuelve el programa.
+
+### Conclusión del punto 4
+El Lema 2 da el valor de cada réplica. El Lema 3 demuestra que la secuencia, que no aumenta y tiende a 0, deja de cumplir la condición en algún punto
+y por eso `takeWhile` termina. El Teorema 1 demuestra que `replicasSensibles` devuelve exactamente las réplicas que pide la especificación. 
+Por lo tanto, `replicasSensibles`$(m, \mu)$ es correcta para todo $m$ y todo $\mu$.
+
+## Punto 5. `informe`
+
+### Especificación de `informe`
+
+Sea $r$ un registro, $\rho$ ("ro") el nombre de una región y $\lvert A \rvert$ la cantidad de elementos de $A$.
+Para una región $\rho$:
+
+- $G_\rho(r)$ es la sublista de los sismos de $r$ cuya región es $\rho$, en el orden en que aparecen.
+- $\mathcal{R}(r) = \{\, \rho : G_\rho(r) \neq \mathrm{Nil} \,\}$ es el conjunto de regiones presentes.
+- $n_\rho = \lvert G_\rho(r) \rvert$ es la cantidad de sismos.
+- $M_\rho$ es la mayor magnitud entre los sismos de $G_\rho(r)$.
+
+La especificación es el mapa $\mathrm{inf}(r, \mu)$ de dominio $\mathcal{R}(r)$ tal que
+
+$$
+\mathrm{inf}(r, \mu)(\rho) = \mathrm{Resumen}\bigl(n_\rho,\ M_\rho,\ \lvert f(M_\rho, \mu) \rvert\bigr)
+$$
+ **Hipótesis (agrupamiento del punto 2).** EL comportamiento de `groupBy` es colocar cada sismo en el grupo de su región, 
+sin importar su posición, y conservar el orden relativo dentro del grupo. Es decir, el dominio de
+`porRegion(r)` es $\mathcal{R}(r)$ y el valor de $porRegion(r)(\rho)$ en $G_\rho(r)$.
+
+**Traducción del `for`.** Según el informe de proceso (sección 5.2), el compilador traduce 
+
+```scala
+ for ((region, n) <- conteo) yield (region, Resumen(...))
+```
+
+a `conteo.withFilter(q).map(g)`. El filtro $q$ comprueba que cada entrada sea una pareja, y toda entrada de un `Map`
+lo es, de modo que no descarta ninguna.
+
+### Lema 4: los dos mapas del punto 2 comparten dominio
+
+**Enunciado.** `conteoPorRegion(r)` y `magnitudMaxima(r)` tienen dominio $\mathcal{R}(r)$, y 
+
+$$
+\texttt{conteoPorRegion}(r)(\rho) = n_\rho, \qquad \texttt{magnitudMaxima} (r)(\rho) = M_\rho
+$$
+**Demostración.** Ambas funciones son de la forma `porRegion(r).map {case (region, g) => (region, h(g))}`, con $h$ igual a la longitud
+de $g$ en el primer caso y al máximo de sus magnitudes en el segundo.
+El `map` conserva las llaves, que son distintas, y aplica $h$ al valor de cada una. 
+Por la hipótesis, la llave $\rho$ tiene como valor $G_\rho(r)$, así que el resultado es $n_\rho$ o $M_\rho$. Ningún grupo es vacío, 
+porque `groupBy` solo crea un grupo para una región con al menos un sismo: por eso el máximo está definido.
+
+### Teorema 2: `informe` cumple su especificación
+
+$$
+\forall r, \mu : \texttt{informe}(r, \mu) == \mathrm{inf}(r, \mu)
+$$
+**Demostración.** Por la traducción de `for`, `informe` aplica `map` a las entradas de `conteo`sin descartar ninguna. Por el Lema 4:
+
+- El dominio del resultado es el de `conteo`, es decir, $\mathcal{R}(r)$.
+- La llamada `maximas(region)` está definida para toda llave $\rho$ que recorre el `for`, porque `maximas` tiene
+el mismo dominio que `conteo`. No se lanza ninguna excepción.
+
+Para cada $\rho \in \mathcal{R}(r)$, el valor en $\rho$ es 
+
+$$
+\mathrm{Resumen}\bigl(n_\rho,\ M_\rho,\ \lvert P_{\text{sensibles}}(M_\rho, \mu) \rvert\bigr)
+$$
+y por el Teorema 1, $\lvert P_{\text{sensibles}}(M_\rho, \mu) \rvert = \lvert f(M_\rho, \mu) \rvert$.
+Esto coincide con $\mathrm{inf}(r, \mu)(\rho)$.
+
+El registro vacío queda incluido: $\mathcal{R}(\mathrm{Nil}) = \emptyset$.
+`conteo` es un mapa vacío y el resultado es `Map()`.
+
+**Ejemplo.** Para el registro `nuevo` del informe de proceso, la región `Cauca` tiene tres sismos y su mayor magnitud es $6.2$. 
+Con $\mu = 4.0$: las réplicas de $6.2$ son $6.2,\ 4.96,\ 3.97,\ \dots$; la primera que falla es $3.97$, así que $\lvert f(6.2, 4.0) \rvert = 2$
+ y el valor es $\mathrm{Resumen}(3,\ 6.2,\ 2)$.
+
+### Teorema 3: el resultado no depende del orden del registro
+
+$$
+\forall r,\ \forall \pi \text{ permutación de } r : \texttt{informe}(\pi(r), \mu) == \texttt{informe}(r, \mu)
+$$
+Aquí $\pi(r)$ es el registro $r$ con los sismos en otro orden.
+
+**Demostración.** Por el Teorema 2, basta comparar $\mathrm{inf}(\pi(r), \mu)$ con $\mathrm{inf}(r, \mu)$.
+
+1. **Mismas regiones.** Un sismo pertenece al grupo de su región sin importar en qué posición esté. Por eso 
+$G_\rho(\pi(r))$ es una permutación de $G_\rho(r)$ y $\mathcal{R}(\pi(r)) == \mathcal{R}(r)$.
+2. **Mismo conteo.** Permutar una lista no cambia su longitud, así que $n_\rho(\pi(r)) = n_\rho(r)$.
+3. **Misma máxima.** El máximo de una colección finita de reales depende de los valores y no de su orden, porque $\max(a, b) = \max(b, a)$
+y $\max(\max(a, b), c) = \max(a, \max(b, c))$. Por tanto $M_\rho(\pi(r)) = M_\rho(r)$ 
+4. **Mismas réplicas.** El tercer componente es función de $M_\rho$ y $\mu$ únicamente. `replicasSensibles` no recorre el registro.
+
+Dos mapas son iguales cuando tienen las mismas llaves y el mismo valor para cada una; el orden de inserción no forma parte de la igualdad. Los dos 
+resúmenes coinciden en todas las regiones, y por lo tanto $\mathrm{inf}(\pi(r), \mu) == \mathrm{inf}(r, \mu)$.
+
+### Conclusión del punto 5
+Por el Lema 4, los mapas de `conteoPorRegion` y `magnitudMaxima` tienen las mismas regiones, así que `informe` puede consultarlos 
+sin error. El Teorema 2 demuestra que `informe` cumple su especificación, y el Teorema 3, que el resultado no depende del orden 
+del registro. Por lo tanto, `informe` es correcto.
