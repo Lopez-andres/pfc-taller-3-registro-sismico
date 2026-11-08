@@ -188,6 +188,40 @@ class RegistroSismicoTest extends AnyFunSuite {
     assert(regionMasActiva(empate) == Some("Arauca"))
   }
 
+  // Test agregados punto 3 ---------------------------------
+
+   val pruebaP3 = List(
+     Sismo(Fecha(2026, 1), "Cauca", 3.0, 10),
+     Sismo(Fecha(2026, 1), "Huila", 9.0, 20),
+     Sismo(Fecha(2026, 1), "Cauca", 5.0, 15)
+   )
+
+  // Test 1: Encuentra la magnitud mayor de Cauca
+  test("maximaDe: Encuentra la magnitud mas alta"){
+    assert(maximaDe(pruebaP3, "Cauca") == Some(5.0))
+  }
+
+  // Test 2: Sins sismos no existe magnitud maxima
+  test("maximaDe: Con registro vacío devuelve None"){
+    assert(maximaDe(List(), "Cauca") == None)
+  }
+
+  // Test 3: Gana la región con más sismos, no con mayor magnitud
+  test("regionMasActiva: Selecciona la región con mas sismos"){
+    assert(regionMasActiva(pruebaP3) == Some("Cauca"))
+  }
+
+  // Test 4: Comprueba que Cauca tiene 2 sismos
+  test("conteoSeguro: Cuenta dos sismos en Cauca"){
+    assert(conteoSeguro(pruebaP3)("Cauca") == 2)
+  }
+
+  // Test 5: Una región con un solo sismo
+  test("maximaDe: Una región con un solo sismo"){
+    assert(maximaDe(pruebaP3, "Huila") == Some(9.0))
+  }
+
+
   // Punto 4 -------------------------------------------------------------------
 
   test("replicas: las primeras cuatro de un sismo de 5.0") {

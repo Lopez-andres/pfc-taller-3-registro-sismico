@@ -332,6 +332,235 @@ println(rs.conteoPorRegion(List()))   // Map()
 `porRegion` agrupa con `groupBy`, y `conteoPorRegion` y `magnitudMaxima` transforman cada entrada con 
 `map` sin recorrer listas a mano. Ninguna usa `for`, así que su ejecución se explica con `groupBy` y `map`.
 
+
+# Punto 3. Consultas seguras
+
+En este punto se implementan tres funciones que permiten consultar el registro sísmico de manera 
+segura: `conteoSeguro`, `maximaDe` y `regionMasActiva`.
+
+Estas funciones utilizan los mapas obtenidos en el punto 2 para consultar la cantidad de sismos, la magnitud máxima
+y mayor actividad de una región. También contemplan los casos en que una región no existe o el registro está vacío 
+
+## 3.1 Función `conteoSeguro`
+
+### Definición del algoritmo
+
+```scala
+  def conteoSeguro(r: Registro): Map[String, Int] = {
+    conteoPorRegion(r).withDefaultValue(0)
+  }
+```
+Devuelve un mapa con la cantidad de sismos de cada región; además de que si no aparece esta devuelve `0` en vez
+de generar un error
+
+### Explicación del código
+
+- `Map[String, Int]`: Indica que el resultado es un mapa que relaciona el nombre de una región
+- `conteoPorRegion(r):` Obtiene un mapa con las regiones y sus cantidades de sismos
+- `withDefaultvalue(0):` Establece el valor `0` para las regiones que no existen
+
+Es importante saber que `withDefaultValue(0)` no agregamos regiones nuevas al mapa, sino que permite consultarlas 
+devolviendo cero.
+
+### Funcionamiento paso a paso
+
+La función `conteoPorRegion(r)` obtiene:
+
+```scala
+Map("Valle" -> 3, "Santander" -> 2, "Choco" -> 2)
+```
+Al usar `conteoSeguro`, las consultas producen
+
+| Región      | ¿Existe en el registro? | Resultado |
+|-------------|-------------------------|-----------|
+| `Valle`     | Sí                      | `3`       |
+| `Santander` | Sí                      | `2`       |
+| `Choco`     | Sí                      | `2`       |
+| `Amazonas`  | No                      | `0`       |
+
+
+### Ejemplo:
+
+```scala
+conteoSeguro(registro)("Valle") // 3
+conteoSeguro(registro)("Amazonas") //0
+conteoSeguro(List())("Valle") // 0
+```
+
+Cuando el registro está vacío, `conteoPorRegion` devuelve `Map()`, pero `withDefaultValue(0)` permite seguir 
+consultando cualquier región y obtiene `0`
+
+## 3.2 Función `maximaDe`
+
+### Definición del algoritmo
+
+```scala
+  def maximaDe(r: Registro, region: String): Option[Double] = magnitudMaxima(r).get(region)
+```
+
+Busca la magnitud máxima de una región específica. Si la región no tiene sismos registrados, devuelve `None`
+
+### Explicación del código
+
+- `magnitudMaxima(r)`: Genera un mapa con la magnitud más alta registrada en cada región
+- `.get(region)`: Busca la región dentro del mapa y devuelve su valor si existe
+- `Option[Double]`: Indica que la función puede devolver una magnitud o no encontrar ningún resultado
+- `Some(valor)`: Representa que se encontró una magnitud
+- `None`: Representa que la región no existe
+
+En este caso, `.get(region)` se utiliza sobre un `Map`, permitiendo consultar una región sin acceder directamente 
+a una clave que podria no existir 
+
+### Funcionamiento paso a paso
+
+Para el registro `magnitudMaxima(r)` obtiene:
+
+```scala
+Map("Valle" -> 5.3, "Santander" -> 5.1, "Choco" -> 6.0)
+```
+
+Al consultar las regiones se obtienen los siguientes resultados:
+
+| Región      | Magnitud máxima | Resultado   |
+|-------------|-----------------|-------------|
+| `Valle`     | `5.3`           | `Some(5.3)` |
+| `Santander` | `5.1`           | `Some(5.1)` |
+| `Choco`     | `6.0`           | `Some(6.0)` |
+| `Amazonas`  | No registrada   | `None`      |
+
+
+### Ejemplo
+
+```scala
+maximaDe(registro, "Valle")    // Some(5.3)
+maximaDe(registro, "Choco") // Some(6.0)
+maximaDe(registro, "Amazonas") // None
+maximaDe(List(), "Valle")  // None
+```
+
+Cuando la región existe, `.get(region)` devuelve `Some` con su magnitud máxima.
+Si la región no está registrada o la lista está vacía, devuelve `None`
+
+## 3.3 Función `regionMasActiva`
+
+### Definición del algoritmo
+
+```scala
+  def regionMasActiva(r: Registro): Option[String] = {
+    val conteo = conteoPorRegion(r)
+    if(conteo.isEmpty){
+      None
+    }
+    else{
+      val mayor = conteo.values.max
+      Some(conteo.keys.filter(region => conteo(region) == mayor).min)
+    }
+  }
+```
+### Explicación del código
+
+- `conteo.isEmpty`: Comprueba si el mapa esta vacío
+- `conteo.values.max`: Obtiene la mayor cantidad de sismos registrados
+- `conteo.keys.filter(region => conteo(region) == mayor)`: Toma solamente las regiones con la misma cantidad máxima
+- `.min`: Selecciona la primera región en orden alfabético si existe un empate
+- `None`: Se devuelve cuando el registro está vacío
+- `Some(..,)`: Devuelve el nombre de la región seleccionada
+
+Esta función identifica la región con mayor cantidad de sismos registrados. Sí existen varias regiones con la 
+misma cantidad máxima, selecciona la primera en orden alfabético y cuando este vacío devuelve `None`  
+
+La condición de `conteo.isEmpty` evita aplicar `.max` a un mapa vacío. Cuando el mapa contiene regiones, siempre 
+existe al menos una con la cantidad máxima, por lo que también puede aplicarse `.min` 
+
+### Funcionamiento paso a paso
+
+Se usa el registro que contiene siete sismos distribuidos en tres regiones
+
+Primero `conteo.values.max` obtiene la cantidad maxima
+
+```scala
+val mayor = conteo.values.max // 3
+```
+
+Después `filter` selecciona la región que tiene esa cantidad
+
+```scala
+conteo.keys.filter(region => conteo(region) == mayor)
+// Selecciona "Valle"
+```
+
+Finalmente, `.min` selecciona la región correspondiente y `Some(...)` devuelve el resultado:
+
+```scala
+regionMasActiva(registro) // Some("Valle")
+```
+
+| Región      | Cantidad de sismos | ¿Cantidad máxima? |
+|-------------|--------------------|-------------------|
+| `Valle`     | `3`                | Sí                |
+| `Santander` | `2`                | No                |
+| `Choco`     | `2`                | No                |
+
+
+### Caso de empate
+
+Supongamos que tenemos un registro con estas cantidades:
+
+| Región      | Cantidad de sismos | ¿Cantidad máxima? |
+|-------------|--------------------|-------------------|
+| `Valle`     | `2`                | Sí                |
+| `Santander` | `2`                | Sí                |
+| `Choco`     | `1`                | No                |
+
+En este caso `filter` selecciona `Valle` y `Santander`, porque ambas tienen 2 sismos
+Después `.min` selecciona `Santander`, porque aparece antes que `Valle` en orden alfabético 
+Dando como resultado `Some("Santander")`
+
+### Caso de registro vacío
+
+Si el registro está vacío, `conteoPorRegion(r)` devuelve `Map()` y la condición `conteo.isEmpty` es verdadera
+
+```scala
+regionMasActiva(List()) // None
+```
+
+Por lo tanto, no se ejecutan las operaciones anteriormente mencionadas (`.max`, `.min`, etc.) devolviendo la 
+función `None`
+
+### Diagrama de flujo
+
+El siguiente diagrama muestra como la función decide que resultado devolver
+
+``` mermaid
+flowchart TD
+    A["Recibir registro r"] --> B["conteoPorRegion(r)"]
+    B --> C{"¿El mapa está vacío?"}
+    C -- Sí --> D["Devolver None"]
+    C -- No --> E["Obtener la cantidad máxima"]
+    E --> F["Filtrar regiones con esa cantidad"]
+    F --> G["Seleccionar la primera alfabéticamente con min"]
+    G --> H["Devolver Some(region)"]
+```
+
+## Ejemplos
+
+```scala
+println(rs.conteoSeguro(registro)("Valle")) // 3
+println(rs.conteoSeguro(registro)("Amazonas")) // 0
+println(rs.maximaDe(registro, "Choco")) // Some(6.0)
+println(rs.maximaDe(registro, "Amazonas")) //None
+println(rs.regionMasActiva(registro)) // Some(Valle)
+println(rs.regionMasActiva(List())) // None
+```
+
+Las tres funciones usan los resultados del punto 2
+
+## Conclusión
+
+Las funciones `conteoSeguro`, `maximaDe` y `regionMasActiva` permiten consultar el registro sísmico de manera correcta, 
+manejando regiones inexistentes, registros vacíos y los empates sin generar errores
+
+
 # Punto 4. `replicas` y `replicasSensibles`
 
 Después de un sismo pueden producirse otros movimientos de menor magnitud, conocidos como réplicas. Para representar este
@@ -683,4 +912,5 @@ sequenceDiagram
 ## Conclusión del punto 5
 `informe` reúne los resultados de los puntos anteriores. Con un `for` recorre el mapa de `conteoPorRegion` y,
 para cada región, construye un `Resumen` con su número de sismos, su magnitud máxima (`magnitudMaxima`) y cuántas réplicas 
-sensibles se esperan del sismo más fuerte de la región (`replicasSensibles`). El resultado es un `Map` con una entrada por cada región del registro.
+sensibles se esperan del sismo más fuerte de la región (`replicasSensibles`). El resultado es un `Map` con una entrada 
+por cada región del registro.
