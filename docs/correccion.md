@@ -182,10 +182,10 @@ cualquier reordenamiento del registro, porque la suma y el máximo son conmutati
 El objetivo de este punto es consultar la información del registro sin que haya errores cuando el registro 
 está vacío o una región no existe
 
-Matemáticamente, lo podemos expresar como: sea $r$ un registro y $\operatorname{Reg}(r)$ el conjunto de regiones 
+Matemáticamente, lo podemos expresar como: sea $r$ un registro y $\mathrm{Reg}(r)$ el conjunto de regiones 
 presentes en él (según definido en el punto 2)
 
-- $\operatorname{Reg}(r)$: Conjunto de regiones presentes en el registro sísmico
+- $\mathrm{Reg}(r)$: Conjunto de regiones presentes en el registro sísmico
 - $Reg$: Operación que obtiene las regiones del registro 
 - $r$: Es el registro del sismo completo o la lista de sismos (Registro)
 - $g$: Representa una región específica (Ejemplo: "Valle", "Choco", etc.)
@@ -203,8 +203,8 @@ Matemáticamente, se puede expresar como:
 $$
 C_r^*(g) =
 \begin{cases}
-C_r(g) & \text{si } g \in \operatorname{Reg}(r)\\
-0 & \text{si } g \notin \operatorname{Reg}(r)
+C_r(g) & \text{si } g \in \mathrm{Reg}(r)\\
+0 & \text{si } g \notin \mathrm{Reg}(r)
 \end{cases}
 $$
 
@@ -247,8 +247,8 @@ Se expresa matemáticamente como:
 $$
 f(r,g) =
 \begin{cases}
-\operatorname{Some}(M_r(g)) & \text{si } g \in \operatorname{Reg}(r)\\
-\operatorname{None} & \text{si } g \notin \operatorname{Reg}(r)
+\operatorname{Some}(M_r(g)) & \text{si } g \in \mathrm{Reg}(r)
+\operatorname{None} & \text{si } g \notin  \mathrm{Reg}(r)
 \end{cases}
 $$
 
@@ -312,8 +312,8 @@ la primera región en orden alfabético
 $$
 f(r) =
 \begin{cases}
-\operatorname{None} & \text{si } r = []\\
-\operatorname{Some}(g^*) & \text{si } r \neq []
+\mathrm{None} & \text{si } r = []\\
+\mathrm{Some}(g^*) & \text{si } r \neq []
 \end{cases}
 $$
 
