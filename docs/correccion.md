@@ -645,8 +645,14 @@ Para una región $\rho$:
 La especificación es el mapa $\mathrm{inf}(r, \mu)$ de dominio $\mathcal{R}(r)$ tal que
 
 $$
-\mathrm{inf}(r, \mu)(\rho) = \mathrm{Resumen}\bigl(n_\rho,\ M_\rho,\ \lvert f(M_\rho, \mu) \rvert\bigr)
+\mathrm{inf}(r,\mu)(\rho) =
+\mathrm{Resumen}\bigl(
+n_\rho,\,
+M_\rho,\,
+\lvert f(M_\rho,\mu)\rvert
+\bigr)
 $$
+
  **Hipótesis (agrupamiento del punto 2).** EL comportamiento de `groupBy` es colocar cada sismo en el grupo de su región, 
 sin importar su posición, y conservar el orden relativo dentro del grupo. Es decir, el dominio de
 `porRegion(r)` es $\mathcal{R}(r)$ y el valor de $porRegion(r)(\rho)$ en $G_\rho(r)$.
