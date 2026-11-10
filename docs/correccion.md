@@ -390,9 +390,9 @@ regionMasActiva(List()) // None
 Cuando el registro está vacío $r = []$, `conteo.isEmpty` es verdadero y la función devuelve `None`, 
 evitando aplicar `.max` sobre un mapa vacío. 
 
-Por lo tanto, si el registro contiene sismos, la función devuelve $\operatorname{Some}(g^*)$, donde $g^*$ representa la 
+Por lo tanto, si el registro contiene sismos, la función devuelve $\mathrm{Some}(g^*)$, donde $g^*$ representa la 
 primera región alfabéticamente entre las que tiene la cantidad máxima de sismos. Si el registro está vacío, 
-devuelve $\operatorname{None}$, coincidiendo ambos casos con la especificación matemática $f(r)$.
+devuelve $\mathrm{None}$, coincidiendo ambos casos con la especificación matemática $f(r)$.
 
 | Registro   | Resultado de `conteoPorRegion` | `conteo.isEmpty` | Resultado |
 |------------|--------------------------------|------------------|-----------|
@@ -438,7 +438,7 @@ y si hay empate `.min` sigue seleccionando la primera región en orden alfabéti
 | 2        | `Choco` (6.0)         | `Valle` (5.3)              |
 | 3        | `Valle` (5.3)         | `Valle` (4.2)              |
 
-Por tanto: $\operatorname{regionMasActiva}(r') = \operatorname{regionMasActiva}(r)$
+Por tanto: $\mathrm{regionMasActiva}(r') = \mathrm{regionMasActiva}(r)$
 
 Demostrando que las tres funciones mantienen sus resultados aunque aparezcan en diferentes órdenes dentro del registro
 
@@ -463,11 +463,11 @@ se entiende que "evalúa a" y $\texttt{==}$, "es igual a".
 Sea $m$ la magnitud inicial. Cada réplica se obtiene reduciendo en un 20% la magnitud anterior, sin redondear el valor
 que se usa para calcular la siguiente; el resultado que se muestra en cada posición sí se redondea a dos decimales.
 
-Sea $\operatorname{red}(x) = \dfrac{\operatorname{round}(100\,x)}{100}$ la función `redondear`. Las réplicas de una 
+Sea $\mathrm{red}(x) = \dfrac{\mathrm{round}(100\,x)}{100}$ la función `redondear`. Las réplicas de una 
 magnitud $m$ son la secuencia infinita:
 
 $$
-R(m) = (r_0, r_1, r_2, \dots), \qquad r_k = \operatorname{red}(0.8^{k}\, m)
+R(m) = (r_0, r_1, r_2, \dots), \qquad r_k = \mathrm{red}(0.8^{k}\, m)
 $$
 
 Sea $P_{\text{replicas}}$ el programa:
@@ -480,27 +480,27 @@ Sea $P_{\text{replicas}}$ el programa:
 Para una secuencia perezosa, la celda $\langle x \mid xs \rangle$ tiene cabeza $x$ y cola $xs$, y la cola solo se calcula al pedirla. El razonamiento se hace en aritmética real; 
 en `Double`, los productos sucesivos pueden diferir de $0.8^k\, m$ en los últimos bits, sin afectar que la secuencia tienda a cero.
 
-**Lema 2.** Para todo $m$ y todo $k \geq 0$, el elemento de posición $k$ de $P_{\text{replicas}}(m)$ es $r_k = \operatorname{red}(0.8^{k}\, m)$.
+**Lema 2.** Para todo $m$ y todo $k \geq 0$, el elemento de posición $k$ de $P_{\text{replicas}}(m)$ es $r_k = \mathrm{red}(0.8^{k}\, m)$.
 
 **Demostración.** Por inducción sobre $k$, con la propiedad enunciada para todo $m$.
 
 **Caso base:** $k = 0$
 
 $$
-P_{\text{replicas}}(m) \rightarrow \langle \operatorname{red}(m) \mid P_{\text{replicas}}(0.8\, m)\rangle
+P_{\text{replicas}}(m) \rightarrow \langle \mathrm{red}(m) \mid P_{\text{replicas}}(0.8\, m)\rangle
 $$
 
-La cabeza es $\operatorname{red}(m) = \operatorname{red}(0.8^{0}\, m) = r_0$. Por lo tanto, la propiedad se cumple para la 
+La cabeza es $\mathrm{red}(m) = \mathrm{red}(0.8^{0}\, m) = r_0$. Por lo tanto, la propiedad se cumple para la 
 posición inicial.
 
 **Caso de inducción:** $k = j + 1$, $j \geq 0$. La hipótesis de inducción (HI) dice que, para 
-cualquier magnitud $m'$, el elemento de posición $j$ de $P_{\text{replicas}}(m')$ es $\operatorname{red}(0.8^{j}\, m')$.
+cualquier magnitud $m'$, el elemento de posición $j$ de $P_{\text{replicas}}(m')$ es $\mathrm{red}(0.8^{j}\, m')$.
 
 El elemento de posición $j + 1$ de $P_{\text{replicas}}(m)$ es el de posición $j$ de su cola, que por la definición es $P_{\text{replicas}}(0.8\, m)$.
 Aplicando la HI con $m' = 0.8\, m$:
 
 $$
-\rightarrow \operatorname{red}(0.8^{j} \cdot 0.8\, m) = \operatorname{red}(0.8^{j+1}\, m) = r_{j+1}
+\rightarrow \mathrm{red}(0.8^{j} \cdot 0.8\, m) = \mathrm{red}(0.8^{j+1}\, m) = r_{j+1}
 $$
 
 Por lo tanto, la propiedad también se cumple para la posición $j + 1$.
@@ -512,7 +512,7 @@ $\blacksquare$
 La demostración nunca usa toda la secuencia, que es infinita, sino sus primeros $n$ elementos, y por eso `take(4)` termina.
 
 **Ejemplo.** Para $m = 7.0$, $P_{\text{replicas}}(7.0).\mathrm{take}(4)$ devuelve $(7.0,\ 5.6,\ 4.48,\ 3.58)$, que corresponden a 
-$\operatorname{red}(7.0),\ \operatorname{red}(5.6),\ \operatorname{red}(4.48)$ y  $\operatorname{red}(3.584)$.
+$\mathrm{red}(7.0),\ \mathrm{red}(5.6),\ \mathrm{red}(4.48)$ y  $\mathrm{red}(3.584)$.
 
 ### `replicasSensibles`: especificación
 
