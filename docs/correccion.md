@@ -390,7 +390,7 @@ regionMasActiva(List()) // None
 Cuando el registro está vacío $r = []$, `conteo.isEmpty` es verdadero y la función devuelve `None`, 
 evitando aplicar `.max` sobre un mapa vacío. 
 
-Por lo tanto, si el registro contiene sismos, la función devuelve $\mathrm{Some}(g^*)$, donde $g^*$ representa la 
+Por lo tanto, si el registro contiene sismos, la función devuelve $\mathrm{Some}(g^*)$, donde `g^*` representa la 
 primera región alfabéticamente entre las que tienen la cantidad máxima de sismos. Si el registro está vacío, 
 devuelve $\mathrm{None}$, coincidiendo ambos casos con la especificación matemática $f(r)$.
 
@@ -418,7 +418,7 @@ correspondientes, realizando estas operaciones:
 Como no está vacío siempre existe al menos una región con la cantidad máxima de sismos, por eso `.max` y `.min` 
 pueden operar.
 
-Por lo tanto, la función devuelve $\mathrm{Some}(g^*)$, donde $g^*$ representa la región seleccionada, cumpliendo 
+Por lo tanto, la función devuelve $\mathrm{Some}(g^*)$, donde `g^*` representa la región seleccionada, cumpliendo 
 la especificación matemática 
 
 ### Independencia del orden del registro
