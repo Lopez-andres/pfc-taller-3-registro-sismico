@@ -676,8 +676,10 @@ porque `groupBy` solo crea un grupo para una región con al menos un sismo: por 
 ### Teorema 2: `informe` cumple su especificación
 
 $$
-\forall r, \mu : \texttt{informe}(r, \mu) == \mathrm{inf}(r, \mu)
+\forall r,\ \mu :
+\texttt{informe}(r,\mu) = \mathrm{inf}(r,\mu)
 $$
+
 **Demostración.** Por la traducción de `for`, `informe` aplica `map` a las entradas de `conteo`sin descartar ninguna. Por el Lema 4:
 
 - El dominio del resultado es el de `conteo`, es decir, $\mathcal{R}(r)$.
@@ -702,8 +704,11 @@ Con $\mu = 4.0$: las réplicas de $6.2$ son $6.2,\ 4.96,\ 3.97,\ \dots$; la prim
 ### Teorema 3: el resultado no depende del orden del registro
 
 $$
-\forall r,\ \forall \pi \text{ permutación de } r : \texttt{informe}(\pi(r), \mu) == \texttt{informe}(r, \mu)
+\forall r,\ \forall \pi\ \text{(permutación de } r\text{)}:
+\mathrm{informe}(\pi(r), \mu) =
+\mathrm{informe}(r, \mu)
 $$
+
 Aquí $\pi(r)$ es el registro $r$ con los sismos en otro orden.
 
 **Demostración.** Por el Teorema 2, basta comparar $\mathrm{inf}(\pi(r), \mu)$ con $\mathrm{inf}(r, \mu)$.
