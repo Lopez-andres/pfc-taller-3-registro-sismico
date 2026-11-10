@@ -689,8 +689,13 @@ el mismo dominio que `conteo`. No se lanza ninguna excepción.
 Para cada $\rho \in \mathcal{R}(r)$, el valor en $\rho$ es 
 
 $$
-\mathrm{Resumen}\bigl(n_\rho,\ M_\rho,\ \lvert P_{\text{sensibles}}(M_\rho, \mu) \rvert\bigr)
+\mathrm{Resumen}\bigl(
+n_\rho,\,
+M_\rho,\,
+\lvert P_{\text{sensibles}}(M_\rho,\mu)\rvert
+\bigr)
 $$
+
 y por el Teorema 1, $\lvert P_{\text{sensibles}}(M_\rho, \mu) \rvert = \lvert f(M_\rho, \mu) \rvert$.
 Esto coincide con $\mathrm{inf}(r, \mu)(\rho)$.
 
