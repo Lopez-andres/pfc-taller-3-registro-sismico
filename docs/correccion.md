@@ -665,8 +665,11 @@ lo es, de modo que no descarta ninguna.
 **Enunciado.** `conteoPorRegion(r)` y `magnitudMaxima(r)` tienen dominio $\mathcal{R}(r)$, y 
 
 $$
-\texttt{conteoPorRegion}(r)(\rho) = n_\rho, \qquad \texttt{magnitudMaxima} (r)(\rho) = M_\rho
+\mathrm{conteoPorRegion}(r)(\rho) = n_\rho,
+\qquad
+\mathrm{magnitudMaxima}(r)(\rho) = M_\rho
 $$
+
 **Demostración.** Ambas funciones son de la forma `porRegion(r).map {case (region, g) => (region, h(g))}`, con $h$ igual a la longitud
 de $g$ en el primer caso y al máximo de sus magnitudes en el segundo.
 El `map` conserva las llaves, que son distintas, y aplica $h$ al valor de cada una. 
