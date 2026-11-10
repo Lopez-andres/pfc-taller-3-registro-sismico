@@ -247,8 +247,8 @@ Se expresa matemáticamente como:
 $$
 f(r,g) =
 \begin{cases}
-\operatorname{Some}(M_r(g)) & \text{si } g \in \mathrm{Reg}(r)
-\operatorname{None} & \text{si } g \notin  \mathrm{Reg}(r)
+\mathrm{Some}(M_r(g)) & \text{si } g \in \mathrm{Reg}(r)
+\mathrm{None} & \text{si } g \notin  \mathrm{Reg}(r)
 \end{cases}
 $$
 
@@ -286,7 +286,7 @@ Al aplicar `.get(region)` se obtiene `Some(valor)` cuando la región existe y `N
 | `Choco`     | $6.0$                    | `Some(6.0)`        |
 | `Amazonas`  | `None`                   | `None`             |
 
-Arrojando que si la región existe devuelve $\operatorname{Some}(M_r(g))$ y si no $\operatorname{None}$,
+Arrojando que si la región existe devuelve $\mathrm{Some}(M_r(g))$ y si no $\mathrm{None}$,
 coincidiendo ambos casos con la especificación matemática $f(r, g)$, evitando consultar directamente 
 claves inexistentes
 
@@ -295,9 +295,9 @@ claves inexistentes
 Debe devolver la región con mayor cantidad de sismos. Si varias regiones tienen la misma cantidad exacta, 
 debe seleccionar la primera en orden alfabético y si está vacío el registro devuelve `None` 
 
-Para un registro no vacío es: $m = \max_{g \in \operatorname{Reg}(r)} C_r(g)$
+Para un registro no vacío es: $m = \max_{g \in \mathrm{Reg}(r)} C_r(g)$
 
-El conjunto de regiones con mayor cantidad de sismos es: $A = \{g \in \operatorname{Reg}(r) \mid C_r(g) = m\}$
+El conjunto de regiones con mayor cantidad de sismos es: $A = \{g \in \mathrm{Reg}(r) \mid C_r(g) = m\}$
 
 La región seleccionada es: $g^* = \min A$
 
