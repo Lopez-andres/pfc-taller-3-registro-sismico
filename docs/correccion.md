@@ -542,10 +542,12 @@ Sea $P_{\text{sensibles}}$ el programa:
 ```
 Para una secuencia perezosa $\langle x \mid xs \rangle$ con cabeza $x$ y cola $xs$, `takeWhile` cumple
 estas ecuaciones, donde $\mathrm{Nil}$ es la lista vacía y $::$ agrega un elemento al inicio:
+
 $$
-\mathrm{takeWhile}_p(\langle x \mid xs \rangle) = \begin{cases}
-x :: \mathrm{takeWhile}_p(xs) & \text{si } p(x) \\ 
-\mathrm{Nil} & \text{si } \neg\, p(x)
+\mathrm{takeWhile}_p(\langle x \mid xs \rangle) =
+\begin{cases}
+x :: \mathrm{takeWhile}_p(xs) & \text{si } p(x) \\
+\mathrm{Nil} & \text{si } \neg p(x)
 \end{cases}
 $$
 
