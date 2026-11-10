@@ -390,7 +390,7 @@ regionMasActiva(List()) // None
 Cuando el registro está vacío $r = []$, `conteo.isEmpty` es verdadero y la función devuelve `None`, 
 evitando aplicar `.max` sobre un mapa vacío. 
 
-Por lo tanto, si el registro contiene sismos, la función devuelve $\mathrm{Some}(g^*)$, donde $g^*$ representa la 
+Por lo tanto, si el registro contiene sismos, la función devuelve $\mathrm{Some}(g^{*})$, donde $g^{*}$ representa la 
 primera región alfabéticamente entre las que tiene la cantidad máxima de sismos. Si el registro está vacío, 
 devuelve $\mathrm{None}$, coincidiendo ambos casos con la especificación matemática $f(r)$.
 
@@ -556,9 +556,9 @@ Por tanto, el $j$ de la especificación existe.
 
 **Demostración.**
 
-- Si $m \leq 0$: $r_0 = \operatorname{red}(m) \leq 0$, de modo que $r_0 > 0$ es falso y $\neg\, p_\mu(r_0)$.
+- Si $m \leq 0$: $r_0 = \mathrm{red}(m) \leq 0$, de modo que $r_0 > 0$ es falso y $\neg\, p_\mu(r_0)$.
 - Si $m > 0$: como $0 <0.8 < 1$, se tiene $0.8^k\, m \to 0$. Sea $k > \log_{0.8}(0.005 / m)$. Entonces $0.8^k\, m < 0.005$,
-así que $100 \cdot 0.8^k\, m < 0.5$ y $\operatorname{round}(100 \cdot 0.8^k\, m) = 0$.
+así que $100 \cdot 0.8^k\, m < 0.5$ y $\mathrm{round}(100 \cdot 0.8^k\, m) = 0$.
 Resulta $r_k = 0$, y $r_k > 0$ es falso, luego $\neg\, p_\mu(r_k)$.
 
 En ambos casos existe una posición en la que la condición falla. Por tanto, la selección termina y el índice $j$ de la 
