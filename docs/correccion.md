@@ -598,8 +598,9 @@ $$
 La cola $(s_1, s_2, \dots)$ cumple $p$ en sus primeras $k$ posiciones y falla en la $k$-ésima. Por la HI:
 
 $$
-\rightarrow s_0 :: (s_1, \dots, s_k) == (s_0, \dots, s_k)
+\rightarrow s_0 :: (s_1,\dots,s_k) = (s_0,\dots,s_k)
 $$
+
 que es el prefijo de longitud $k +1$. Concluimos por inducción que la propiedad vale para todo $n$.
 
 **Aplicación.** Por el Lema 2, la secuencia que produce `replicas(m)` es $s = R(m)$. 
@@ -607,8 +608,9 @@ Se toma $p = p_\mu$. Por el Lema 3 existe
 $j = \min\{k : \neg\, p_\mu(r_k)\}$, y por la propiedad:
 
 $$
-\mathrm{takeWhile}_{p_\mu}(R(m)) == (r_0, \dots, r_{j-1}) = f(m, \mu)
+\mathrm{takeWhile}_{p_\mu}(R(m)) = (r_0,\dots,r_{j-1}) = f(m,\mu)
 $$
+
 Con el modelo de sustitución:
 
 $$
