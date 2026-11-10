@@ -200,13 +200,13 @@ La función debe devolver el número de sismos de una región existente y cero c
 
 Matemáticamente, se puede expresar como:
 
-$
+$$
 C_r^*(g) =
 \begin{cases}
 C_r(g) & \text{si } g \in \operatorname{Reg}(r)\\
 0 & \text{si } g \notin \operatorname{Reg}(r)
 \end{cases}
-$
+$$
 
 - $^*$: Indica que el conteo es seguro
 
@@ -244,13 +244,13 @@ Debe devolver la magnitud máxima de una región si tiene sismos registrados o `
 
 Se expresa matemáticamente como:
 
-$
+$$
 f(r,g) =
 \begin{cases}
 \operatorname{Some}(M_r(g)) & \text{si } g \in \operatorname{Reg}(r)\\
 \operatorname{None} & \text{si } g \notin \operatorname{Reg}(r)
 \end{cases}
-$
+$$
 
 Si la región existe en el registro, la función devuelve `Some` con la magnitud máxima de esa región y 
 si no devuelve `None`
@@ -309,13 +309,13 @@ La especificación viene siendo: Para cualquier registro sísmico, la función d
 en caso contrario devuelve `Some` con la región que tiene la mayor cantidad de sismos y si hay empate entonces es con 
 la primera región en orden alfabético
 
-$
+$$
 f(r) =
 \begin{cases}
 \operatorname{None} & \text{si } r = []\\
 \operatorname{Some}(g^*) & \text{si } r \neq []
 \end{cases}
-$
+$$
 
 - $f$: Representa la función `regionMasActiva`
 

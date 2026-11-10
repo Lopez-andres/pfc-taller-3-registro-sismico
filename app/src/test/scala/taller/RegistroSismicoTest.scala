@@ -173,6 +173,8 @@ class RegistroSismicoTest extends AnyFunSuite {
     assert(maximaDe(registro, "Amazonas") == None)
   }
 
+
+
   test("regionMasActiva: el Valle, con tres sismos") {
     assert(regionMasActiva(registro) == Some("Valle"))
   }
@@ -221,6 +223,38 @@ class RegistroSismicoTest extends AnyFunSuite {
     assert(maximaDe(pruebaP3, "Huila") == Some(9.0))
   }
 
+  val empate3 = List(
+    Sismo(Fecha(2026, 1), "Sucre", 4.0, 10),
+    Sismo(Fecha(2026, 1), "Boyaca", 4.5, 12),
+    Sismo(Fecha(2026, 2), "Sucre", 3.5, 15),
+    Sismo(Fecha(2026, 2), "Boyaca", 5.0, 20),
+    Sismo(Fecha(2026, 3), "Tolima", 8.0, 30)
+  )
+
+  test("propia conteoSeguro: con datos propios, lo conocido cuenta y lo desconocido da cero") {
+    assert(conteoSeguro(pruebaP3)("Cauca") == 2)
+    assert(conteoSeguro(pruebaP3)("Huila") == 1)
+    assert(conteoSeguro(pruebaP3)("Narino") == 0)
+  }
+
+  test("propia maximaDe: el máximo puede ser el primer sismo de la región") {
+    val maxPrimero = List(
+      Sismo(Fecha(2026, 2), "Cauca", 7.0, 10),
+      Sismo(Fecha(2026, 2), "Cauca", 2.0, 10))
+    assert(maximaDe(maxPrimero, "Cauca") == Some(7.0))
+  }
+
+  test("propia regionMasActiva: empate de dos regiones, gana Boyaca aunque Sucre aparece primero") {
+    assert(regionMasActiva(empate3) == Some("Boyaca"))
+  }
+
+  test("propia regionMasActiva: la región de mayor magnitud no gana si tiene menos sismos") {
+    assert(regionMasActiva(empate3) != Some("Tolima"))
+  }
+
+  test("propia regionMasActiva: el resultado no depende del orden del registro") {
+    assert(regionMasActiva(empate3.reverse) == regionMasActiva(empate3))
+  }
 
   // Punto 4 -------------------------------------------------------------------
 

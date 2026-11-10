@@ -17,7 +17,7 @@ la nota.
 | Nombre completo            | Código       |
 |----------------------------|--------------|
 | Andrés Mauricio Peña López | 2380335-2724 |
-| Luz Amelia Ibarguen        | 2380404-2724 |
+| Luz Amelia Ibarguen Ibarra | 2380404-2724 |
 | Katherine López Unas       | 2380339-2724 |
 
 ## Cómo está organizado el proyecto
