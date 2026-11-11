@@ -559,7 +559,7 @@ Por tanto, el $j$ de la especificación existe.
 **Demostración.**
 
 - Si $m \leq 0$: $r_0 = \mathrm{red}(m) \leq 0$, de modo que $r_0 > 0$ es falso y $\neg\, p_\mu(r_0)$.
-- Si $m > 0$: como $0 <0.8 < 1$, se tiene $0.8^k\, m \to 0$. Sea $k > \log_{0.8}(0.005 / m)$. Entonces $0.8^k\, m < 0.005$,
+- Si $m > 0$: como $0 < 0.8 < 1$, se tiene $0.8^k\, m \to 0$. Sea $k > \log_{0.8}(0.005 / m)$. Entonces $0.8^k\, m < 0.005$,
 así que $100 \cdot 0.8^k\, m < 0.5$ y $\mathrm{round}(100 \cdot 0.8^k\, m) = 0$.
 Resulta $r_k = 0$, y $r_k > 0$ es falso, luego $\neg\, p_\mu(r_k)$.
 
@@ -600,7 +600,7 @@ $$
 La cola $(s_1, s_2, \dots)$ cumple $p$ en sus primeras $k$ posiciones y falla en la $k$-ésima. Por la HI:
 
 $$
-\rightarrow s_0 :: (s_1,\dots,s_k) = (s_0,\dots,s_k)
+\rightarrow s_0 :: (s_1,\dots,s_k) == (s_0,\dots,s_k)
 $$
 
 que es el prefijo de longitud $k +1$. Concluimos por inducción que la propiedad vale para todo $n$.
@@ -610,7 +610,7 @@ Se toma $p = p_\mu$. Por el Lema 3 existe
 $j = \min\{k : \neg\, p_\mu(r_k)\}$, y por la propiedad:
 
 $$
-\mathrm{takeWhile}_{p_\mu}(R(m)) = (r_0,\dots,r_{j-1}) = f(m,\mu)
+\mathrm{takeWhile}_{p_\mu}(R(m)) == (r_0,\dots,r_{j-1}) = f(m,\mu)
 $$
 
 Con el modelo de sustitución:
@@ -657,9 +657,9 @@ M_\rho,\,
 \bigr)
 $$
 
- **Hipótesis (agrupamiento del punto 2).** EL comportamiento de `groupBy` es colocar cada sismo en el grupo de su región, 
+**Hipótesis (agrupamiento del punto 2).** El comportamiento de `groupBy` es colocar cada sismo en el grupo de su región, 
 sin importar su posición, y conservar el orden relativo dentro del grupo. Es decir, el dominio de
-`porRegion(r)` es $\mathcal{R}(r)$ y el valor de $porRegion(r)(\rho)$ en $G_\rho(r)$.
+`porRegion(r)` es $\mathcal{R}(r)$ y el valor de $\mathrm{porRegion}(r)(\rho)$ es $G_\rho(r)$.
 
 **Traducción del `for`.** Según el informe de proceso (sección 5.2), el compilador traduce 
 
@@ -690,13 +690,14 @@ porque `groupBy` solo crea un grupo para una región con al menos un sismo: por 
 
 $$
 \forall r,\ \mu :
-\texttt{informe}(r,\mu) = \mathrm{inf}(r,\mu)
+\texttt{informe}(r,\mu) == \mathrm{inf}(r,\mu)
 $$
 
-**Demostración.** Por la traducción de `for`, `informe` aplica `map` a las entradas de `conteo`sin descartar ninguna. Por el Lema 4:
+**Demostración.** Por la traducción de `for`, `informe` aplica `map` a las entradas de `conteo` sin descartar ninguna, y cada 
+entrada nueva conserva su región como llave. Por el Lema 4:
 
 - El dominio del resultado es el de `conteo`, es decir, $\mathcal{R}(r)$.
-- La llamada `maximas(region)` está definida para toda llave $\rho$ que recorre el `for`, porque `máximas` tiene
+- La llamada `maximas(region)` está definida para toda llave $\rho$ que recorre el `for`, porque `maximas` tiene
 el mismo dominio que `conteo`. No se lanza ninguna excepción.
 
 Para cada $\rho \in \mathcal{R}(r)$, el valor en $\rho$ es 
@@ -722,9 +723,9 @@ Con $\mu = 4.0$: las réplicas de $6.2$ son $6.2,\ 4.96,\ 3.97,\ \dots$; la prim
 ### Teorema 3: el resultado no depende del orden del registro
 
 $$
-\forall r,\ \forall \pi\ \text{(permutación de } r\text{)}:
-\mathrm{informe}(\pi(r), \mu) =
-\mathrm{informe}(r, \mu)
+\forall r,\ \mu,\ \forall \pi\ \text{(permutación de } r\text{)}:
+\texttt{informe}(\pi(r), \mu) ==
+\texttt{informe}(r, \mu)
 $$
 
 Aquí $\pi(r)$ es el registro $r$ con los sismos en otro orden.
@@ -735,7 +736,7 @@ Aquí $\pi(r)$ es el registro $r$ con los sismos en otro orden.
 $G_\rho(\pi(r))$ es una permutación de $G_\rho(r)$ y $\mathcal{R}(\pi(r)) == \mathcal{R}(r)$.
 2. **Mismo conteo.** Permutar una lista no cambia su longitud, así que $n_\rho(\pi(r)) = n_\rho(r)$.
 3. **Misma máxima.** El máximo de una colección finita de reales depende de los valores y no de su orden, porque $\max(a, b) = \max(b, a)$
-y $\max(\max(a, b), c) = \max(a, \max(b, c))$. Por tanto $M_\rho(\pi(r)) = M_\rho(r)$ 
+y $\max(\max(a, b), c) = \max(a, \max(b, c))$. Por tanto $M_\rho(\pi(r)) = M_\rho(r)$.
 4. **Mismas réplicas.** El tercer componente es función de $M_\rho$ y $\mu$ únicamente. `replicasSensibles` no recorre el registro.
 
 Dos mapas son iguales cuando tienen las mismas llaves y el mismo valor para cada una; el orden de inserción no forma parte de la igualdad. Los dos 

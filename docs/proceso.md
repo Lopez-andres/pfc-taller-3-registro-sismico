@@ -610,7 +610,7 @@ Para observar el comportamiento de la función se utiliza una magnitud inicial d
 ```Scala
 replicas(7.0).take(4).toList
 ```
-### Resultado:
+### Resultado
 
 ```Scala
 List(7.0, 5.6, 4.48, 3.58)
@@ -656,7 +656,7 @@ valor mínimo, y devuelve una lista con las réplicas que cumplen esa condición
 ```Scala
   /** Las réplicas mientras superen el mínimo, incluida la primera. */
   def replicasSensibles(magnitud: Double, minimo: Double): List[Double] =
-     replicas(magnitud).takeWhile(m =>m > minimo && m > 0).toList
+    replicas(magnitud).takeWhile(m => m > minimo && m > 0).toList
 ```
 
 ### Explicación del código
@@ -668,14 +668,14 @@ valor mínimo, y devuelve una lista con las réplicas que cumplen esa condición
 que decrece hacia cero, nunca fallaría la condición: con `m > 0` el recorrido se detiene cuando las réplicas se redondean a `0.0`.
 * `toList`: convierte las magnitudes seleccionadas en una lista.
 
-* `takeWhile` se usa en lugar de`filter` porque `filter` seguiría buscando elementos en el resro de la secuencia 
-infinita, mientras que `takeWhile` se detiene en el primero que no cumple.
+* `takeWhile` se usa en lugar de `filter` porque `filter` seguiría buscando elementos en el resto de la secuencia infinita,
+mientras que `takeWhile` se detiene en el primero que no cumple.
 
 ### Funcionamiento paso a paso
 
 Se utiliza como ejemplo un sismo de magnitud 7.0 y un mínimo de 4.0.
 
-| `Paso` | `Magnitud` | `¿Supera el mínimo?` | `Acción` |
+| Paso | Magnitud | ¿Supera el mínimo? | Acción |
 |---|---|---|---|
 | 1 | 7.0 | Sí | Se conserva. |
 | 2 | 5.6 | Sí | Se conserva. |
@@ -724,7 +724,7 @@ sequenceDiagram
     Main->>Main: toList
 ```
 ### Diagrama de decisión
-Cada vuelta del ciclo pide réplica y decide si se conserva o si el recorrido termina.
+Cada paso pide la siguiente réplica y decide si se conserva o si el recorrido termina.
 
 ```mermaid
 flowchart TD
@@ -736,7 +736,7 @@ flowchart TD
 ```
 
 ## 4.3 Evaluación perezosa de LazyList
-La secuencia generada por `replicas` es infinita, por lo que no sería conveniente calcular todos sus elementos desde el comienzo.
+La secuencia generada por `replicas` es infinita, por lo que no es posible calcular todos sus elementos.
 
 Para solucionar esto se utiliza `LazyList`, que permite aplazar los cálculos hasta que se solicitan los elementos.
 
@@ -751,15 +751,15 @@ Esto permite trabajar con una secuencia infinita sin necesidad de recorrerla com
 
 Se comprobó con un contador sobre una copia de `replicas`:
 
-| `llamada` | `Devuelve` | `Magnitudes calculadas` |
+| Llamada | Devuelve | Magnitudes calculadas |
 |---|---|---|
 | `replicas(7.0)`, recién creada | nada | 0 |
-| `replicas(7.0).take(4)` | 4 | 4 |
+| `replicas(7.0).take(4).toList` | 4 | 4 |
 | `replicasSensibles(7.0, 4.0)` | 3 | 4 |
 | `replicasSensibles(9.0, 4.0)` | 4 | 5 |
 | `replicasSensibles(3.0, 4.0)` | 0 | 1 |
 
-### Diagrama de llamados  `replicas` y `replicasSensibles`
+### Diagrama de llamados de `replicas` y `replicasSensibles`
 
 ```mermaid
 sequenceDiagram
@@ -776,7 +776,7 @@ sequenceDiagram
         W->>R: pide la siguiente réplica
         R-->>W: 7.0, 5.6 y 4.48 (cumplen)
     end
-    W-->>R: pide la siguiente réplica
+    W->>R: pide la siguiente réplica
     R-->>W: 3.58 (no cumple)
     W-->>S: finaliza
     S-->>S: toList
@@ -803,11 +803,11 @@ es un `Resumen`, y el resultado es un mapa que asocia cada región con su ficha.
 ## 5.1 Función `informe`
 
 ```Scala
-  def informe(r: Registro, minimo: Double): Map[String, Resumen] ={
-     val conteo = conteoPorRegion(r)
-     val maximas = magnitudMaxima(r)
-     for((region, n) <- conteo)
-       yield (region, Resumen(n, maximas(region), replicasSensibles(maximas(region), minimo).length))
+  def informe(r: Registro, minimo: Double): Map[String, Resumen] = {
+    val conteo = conteoPorRegion(r)
+    val maximas = magnitudMaxima(r)
+    for ((region, n) <- conteo)
+      yield (region, Resumen(n, maximas(region), replicasSensibles(maximas(region), minimo).length))
   }
 ```
 
@@ -865,7 +865,7 @@ val nuevo = List(
 ```Scala
 informe(nuevo, 4.0)
 ```
-### Resultado:
+### Resultado
 
 ```Scala
 Map("Cauca" -> Resumen(3, 6.2, 2), "Huila" -> Resumen(2, 5.8, 2))
