@@ -61,8 +61,8 @@ Ambas son casos del Lema 1:
 
 | Función                | $p(s)$                       | $h(s)$        |
 |------------------------|------------------------------|---------------|
-| `fuertes(r, umbral)`   | $s.\text{magnitud} > umbral$ | $s.\text{region}$   |
-| `enRegion(r, region)`  | $s.\text{region} = region$   | $s.\text{magnitud}$ |
+| `fuertes(r, umbral)`   | $s.\text{magnitud} > \text{umbral}$ | $s.\text{region}$   |
+| `enRegion(r, region)`  | $s.\text{region} = \text{region}$   | $s.\text{magnitud}$ |
 
 Por lo tanto ambas son correctas. Con el registro del enunciado, `fuertes(registro, 5.0)` pasa los sismos 2, 4 y 6
 y da `List("Santander", "Choco", "Valle")`, como pide el enunciado. Si ningún sismo cumple $p$, la HI y el 
@@ -186,7 +186,7 @@ Matemáticamente, lo podemos expresar como: sea $r$ un registro y $\mathrm{Reg}(
 presentes en él (según definido en el punto 2)
 
 - $\mathrm{Reg}(r)$: Conjunto de regiones presentes en el registro sísmico
-- $Reg$: Operación que obtiene las regiones del registro 
+- $\mathrm{Reg}$: Operación que obtiene las regiones del registro 
 - $r$: Es el registro del sismo completo o la lista de sismos (Registro)
 - $g$: Representa una región específica (Ejemplo: "Valle", "Choco", etc.)
 - $C_r(g)$: Cantidad de sismos registrados en la región $g$
@@ -214,7 +214,7 @@ $$
 
 El registro sísmico contiene:
 - `Valle:` 3 sismos
-- `Santander:`2 sismos
+- `Santander:` 2 sismos
 - `Choco:` 2 sismos
 
 La función que se usa es:
@@ -255,7 +255,7 @@ $$
 Si la región existe en el registro, la función devuelve `Some` con la magnitud máxima de esa región y 
 si no devuelve `None`
 
-- $f(r, g)$: Especificación de `maximaDe`, que recibe el registro y una región
+- $f_{\text{maximaDe}}(r, g)$: Especificación de `maximaDe`, que recibe el registro y una región
 - `Some:` Se encontró un valor 
 - `None:` No existe un valor para devolver
 
@@ -287,8 +287,7 @@ Al aplicar `.get(region)` se obtiene `Some(valor)` cuando la región existe y `N
 | `Amazonas`  | `None`                   | `None`             |
 
 Por tanto, cuando la región existe devuelve $\mathrm{Some}(M_r(g))$ y si no $\mathrm{None}$,
-coincidiendo ambos casos con la especificación matemática $f(r, g)$, evitando consultar directamente 
-claves inexistentes
+coincidiendo ambos casos con la especificación matemática $f_{\text{maximaDe}}(r, g)$, evitando consultar directamente claves inexistentes
 
 ### `regionMasActiva`
 
@@ -317,13 +316,13 @@ f_{\text{activa}}(r) =
 \end{cases}
 $$
 
-- $f$: Representa la especificación matematica `regionMasActiva`
+- $f_{\text{activa}}$: Representa la especificación matemática `regionMasActiva`
 
 `Ejemplo ilustrativo:`
 
 El registro sísmico se sabe que contiene:
 - `Valle:` 3 sismos
-- `Santander:`2 sismos
+- `Santander:` 2 sismos
 - `Choco:` 2 sismos
 
 La función que se usa es:
@@ -340,7 +339,7 @@ def regionMasActiva(r: Registro): Option[String] = {
 }
 ```
 
-Entonces después de que la función `conteoPorRegion(r)` de sus resultados `conteo.values.max` obtiene la cantidad 
+Entonces después de que la función `conteoPorRegion(r)` da sus resultados `conteo.values.max` obtiene la cantidad 
 máxima de sismos:
 
 ```scala
@@ -383,11 +382,11 @@ presente $g$, sus valores son $C_r(g)$ y $M_r(g)$, respectivamente
 Sea $g$ una región cualquiera
 
 - Si $g \in \mathrm{Reg}(r)$: `conteoPorRegion(r)` tiene esa clave con valor $C_r(g)$, `withDefaultValue(0)` no 
-   modifica los valores de las claves existentes, por lo que `conteoSeguro(r)(g)` devuelven $C_r(g)$
+   modifica los valores de las claves existentes, por lo que `conteoSeguro(r)(g)` devuelve $C_r(g)$
 - Si $g \notin \mathrm{Reg}(r)$: La clave está ausente y `withDefaultValue(0)` hace que `conteoSeguro(r)(g)` 
-   devuelve $0$
+   devuelva $0$
 
-Ambos resultados coinciden con $C_r^*(g)$. Esto también cubre el registro vacío, en el que ninguna region este 
+Ambos resultados coinciden con $C_r^*(g)$. Esto también cubre el registro vacío, en el que ninguna región esté 
 presente; por tanto, `conteoSeguro` cumple con la especificación
 
 #### Corrección de `maximaDe`
@@ -403,7 +402,7 @@ caso para toda región. Por tanto, `maximaDe` cumple su especificación
 
 #### Corrección de `regionMasActiva`
 
-Se consideran el registro vacío y el no vacío. El empate se explica como un caso particular del segundo.
+Se consideran dos situaciones: el registro vacío (Caso 2) y el no vacío (Caso 3). El empate (Caso 1) es una situación particular del registro no vacío.
 
 #### Caso 1: Registro con empate
 
@@ -436,8 +435,8 @@ El resultado coincide con el primer caso $f_{\text{activa}}(r)$
 
 #### Caso 3: Registro no vacío
 
-Si $r \neq [\,]$, entonces $\mathrm{Reg}(r)\neq\varnothing$, El mapa `conteo` tiene al menos una entrada, por lo que 
-`conteo.values.max` esta definido y obtiene:
+Si $r \neq [\,]$, entonces $\mathrm{Reg}(r)\neq\varnothing$. El mapa `conteo` tiene al menos una entrada, por lo que 
+`conteo.values.max` está definido y obtiene:
 
 $$
 m=\max_{g\in\mathrm{Reg}(r)} C_r(g)
@@ -456,12 +455,12 @@ tal como indica $f_{\text{activa}}(r)$.
 Como no está vacío siempre existe al menos una región con la cantidad máxima de sismos, por eso `.max` y `.min` 
 pueden operar.
 
-Por lo tanto, la función devuelve $\mathrm{Some}(g^*)$, donde `g^*` representa la región seleccionada, cumpliendo 
-la especificación matemática 
+Por lo tanto, la función devuelve $\mathrm{Some}(g^*)$, donde $g^*$ representa la región seleccionada, cumpliendo 
+la especificación matemática.
 
 ### Independencia del orden del registro
 
-Sea  $r'$ cualquier permutación de $r$: ambos registros contienen exactamente los mismos sismos, aunque aparezcan 
+Sea $r'$ cualquier permutación de $r$: ambos registros contienen exactamente los mismos sismos, aunque aparezcan 
 en posiciones diferentes. Por eso, $\mathrm{Reg}(r') = \mathrm{Reg}(r)$
 
 Por el punto 2, para cada región presente $g$, su cantidad de sismos y su magnitud máxima no cambian al reorganizar
@@ -477,9 +476,9 @@ $$
 Esto ocurre porque el conteo y el máximo dependen de los elementos registrados, no del orden en que se recorren. 
 
 Los mapas `conteoPorRegion(r')` y `magnitudMaxima(r')` tienen las mismas claves y valores que `conteoPorRegion(r)` 
-y `magnitudMaxima(r)` respectivamnte
+y `magnitudMaxima(r)` respectivamente
 
-- `conteoSeguro`: Aplica `withDefaultValue(0)` al mismo contenido del mapa de conteos, todas las consultas devuelve 
+- `conteoSeguro`: Aplica `withDefaultValue(0)` al mismo contenido del mapa de conteos, todas las consultas devuelven 
   el mismo número, incluso para las regiones ausentes
 
 - `maximaDe`: Usa `.get(g)` sobre el mismo contenido del mapa de máximas, por lo que devuelve el mismo `Some(valor)`
@@ -496,8 +495,8 @@ y `magnitudMaxima(r)` respectivamnte
 | 2        | `Choco` (6.0)         | `Valle` (5.3)              |
 | 3        | `Valle` (5.3)         | `Valle` (4.2)              |
 
-Aunque las posiciones cambian, ambos registros contienen dos sismos de `Valle` y uno de `Chocó`; el máximo de `Valle` 
-sigue siendo $5.3$ y de Chocó $6.0$, en ambos registros `regionMasActiva` devuelve `Some("Valle")`
+Aunque las posiciones cambian, ambos registros contienen dos sismos de `Valle` y uno de `Choco`; el máximo de `Valle` 
+sigue siendo $5.3$ y de Choco $6.0$, en ambos registros `regionMasActiva` devuelve `Some("Valle")`
 
 En general, para toda la región $g$:
 
@@ -545,8 +544,8 @@ $$
 Sea $P_{\text{replicas}}$ el programa:
 
 ```scala
- def replicas(magnitud: Double): LazyList[Double] =
-    redondear(magnitud) #:: replicas(magnitud * 0.8)
+def replicas(magnitud: Double): LazyList[Double] =
+  redondear(magnitud) #:: replicas(magnitud * 0.8)
 ```
 
 Para una secuencia perezosa, la celda $\langle x \mid xs \rangle$ tiene cabeza $x$ y cola $xs$, y la cola solo se calcula al pedirla. El razonamiento se hace en aritmética real; 
@@ -609,8 +608,8 @@ $$
 Sea $P_{\text{sensibles}}$ el programa: 
 
 ```scala
-  def replicasSensibles(magnitud: Double, minimo: Double): List[Double] =
-    replicas(magnitud).takeWhile(m => m > minimo && m > 0).toList
+def replicasSensibles(magnitud: Double, minimo: Double): List[Double] =
+  replicas(magnitud).takeWhile(m => m > minimo && m > 0).toList
 ```
 Para una secuencia perezosa $\langle x \mid xs \rangle$ con cabeza $x$ y cola $xs$, `takeWhile` cumple
 estas ecuaciones, donde $\mathrm{Nil}$ es la lista vacía y $::$ agrega un elemento al inicio:
@@ -737,7 +736,7 @@ sin importar su posición, y conservar el orden relativo dentro del grupo. Es de
 **Traducción del `for`.** Según el informe de proceso (sección 5.2), el compilador traduce 
 
 ```scala
- for ((region, n) <- conteo) yield (region, Resumen(...))
+for ((region, n) <- conteo) yield (region, Resumen(...))
 ```
 
 a `conteo.withFilter(q).map(g)`. El filtro $q$ comprueba que cada entrada sea una pareja, y toda entrada de un `Map`
@@ -816,6 +815,6 @@ Dos mapas son iguales cuando tienen las mismas llaves y el mismo valor para cada
 resúmenes coinciden en todas las regiones, y por lo tanto $\mathrm{inf}(\pi(r), \mu) == \mathrm{inf}(r, \mu)$.
 
 ### Conclusión del punto 5
-Por el Lema 4, los mapas de `conteoPorRegion` y `magnitudMaxima` tienen las mismas regiones, así que `informe` puede consultarlos 
+Por el Lema 4, los mapas de `conteoPorRegion` y `magnitudMaxima` tienen las mismas regiones, así que `informe` puede consultarlos
 sin error. El Teorema 2 demuestra que `informe` cumple su especificación, y el Teorema 3, que el resultado no depende del orden 
 del registro. Por lo tanto, `informe` es correcto.
