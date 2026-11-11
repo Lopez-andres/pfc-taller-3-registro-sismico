@@ -588,6 +588,7 @@ La demostración es por inducción sobre $n$.
 $$
 \mathrm{takeWhile}_p(s) \rightarrow \mathrm{Nil} == ()
 $$
+
 que es el prefijo vacío.
 
 **Caso de inducción.** $n = k + 1$. La hipótesis de inducción (HI) dice que la propiedad vale para cualquier secuencia cuyo 
