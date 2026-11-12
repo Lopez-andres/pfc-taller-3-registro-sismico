@@ -201,16 +201,16 @@ La función devuelve el número de sismos de una región existente y cero cuando
 Matemáticamente, se puede expresar como:
 
 $$
-C_r^*(g) =
+C_r^{\ast}(g) =
 \begin{cases}
 C_r(g) & \text{si } g \in \mathrm{Reg}(r)\\
 0 & \text{si } g \notin \mathrm{Reg}(r)
 \end{cases}
 $$
 
-- $^*$: Indica que el conteo se extiende de forma segura a las regiones ausentes
+- $^{\ast}$: Indica que el conteo se extiende de forma segura a las regiones ausentes
 
-`Ejemplo ilustrativo:`
+**Ejemplo ilustrativo:**
 
 El registro sísmico contiene:
 - `Valle:` 3 sismos
@@ -236,7 +236,7 @@ Aplicando `withDefaultValue(0)` se obtiene que:
 | `Santander` | $2$               | $2$                |
 | `Amazonas`  | $0$               | $0$                |
 
-Esta tabla ilustra ambos casos de la especificación $C_r^*(g)$
+Esta tabla ilustra ambos casos de la especificación $C_r^{\ast}(g)$
 
 
 ### `maximaDe`
@@ -259,7 +259,7 @@ si no devuelve `None`
 - `Some:` Se encontró un valor 
 - `None:` No existe un valor para devolver
 
-`Ejemplo ilustrativo:`
+**Ejemplo ilustrativo:**
 
 El registro sísmico contiene las siguientes magnitudes:
 - `Valle:` 4.2, 3.8 y 5.3
@@ -298,10 +298,10 @@ Para un registro no vacío es: $m = \max_{g \in \mathrm{Reg}(r)} C_r(g)$
 
 El conjunto de regiones con esa cantidad máxima es: $A = \{g \in \mathrm{Reg}(r) \mid C_r(g) = m\}$
 
-La región seleccionada es $g^* = \min A$ donde el mínimo se toma según el orden alfabético de los nombres
+La región seleccionada es $g^{\ast} = \min A$ donde el mínimo se toma según el orden alfabético de los nombres
 
 - $\min A$: La primera región en orden alfabético
-- $g^*$: El asterisco indica cuál es la región seleccionada como la más activa
+- $g^{\ast}$: El asterisco indica cuál es la región seleccionada como la más activa
 - $A$: Conjunto de regiones que tienen la máxima cantidad de sismos
 
 La especificación viene siendo: Para cualquier registro sísmico, la función devuelve `None` si el registro está vacío,
@@ -312,13 +312,13 @@ $$
 f_{\text{activa}}(r) =
 \begin{cases}
 \mathrm{None} & \text{si } r = [\,]\\
-\mathrm{Some}(g^*) & \text{si } r \neq [\,]
+\mathrm{Some}(g^{\ast}) & \text{si } r \neq [\,]
 \end{cases}
 $$
 
 - $f_{\text{activa}}$: Representa la especificación matemática `regionMasActiva`
 
-`Ejemplo ilustrativo:`
+**Ejemplo ilustrativo:**
 
 El registro sísmico se sabe que contiene:
 - `Valle:` 3 sismos
@@ -386,7 +386,7 @@ Sea $g$ una región cualquiera
 - Si $g \notin \mathrm{Reg}(r)$: La clave está ausente y `withDefaultValue(0)` hace que `conteoSeguro(r)(g)` 
    devuelva $0$
 
-Ambos resultados coinciden con $C_r^*(g)$. Esto también cubre el registro vacío, en el que ninguna región esté 
+Ambos resultados coinciden con $C_r^{\ast}(g)$. Esto también cubre el registro vacío, en el que ninguna región está 
 presente; por tanto, `conteoSeguro` cumple con la especificación
 
 #### Corrección de `maximaDe`
@@ -394,7 +394,7 @@ presente; por tanto, `conteoSeguro` cumple con la especificación
 Sea $g$ una región cualquiera
 
 - Si $g \in \mathrm{Reg}(r)$: `magnitudMaxima(r)` contiene la región $g$ con valor $M_r(g)$, por lo tanto, 
-   `.get(g)` devuelve `Some(M_r(g))`.
+   `.get(g)` devuelve $\mathrm{Some}(M_r(g))$.
 - Si $g \notin \mathrm{Reg}(r)$: `.get(g)` devuelve `None`, sin lanzar una excepción por una clave ausente
 
 En ambos casos el resultado coincide con $f_{\text{maximaDe}}(r,g)$. Cuando $r$ está vacío, se aplica el segundo 
@@ -404,7 +404,7 @@ caso para toda región. Por tanto, `maximaDe` cumple su especificación
 
 Se consideran dos situaciones: el registro vacío (Caso 2) y el no vacío (Caso 3). El empate (Caso 1) es una situación particular del registro no vacío.
 
-#### Caso 1: Registro con empate
+##### Caso 1: Registro con empate
 
 Si dos o más regiones alcanzan el valor máximo $m$, todas quedan incluidas en $A$. La operación `.min` selecciona 
 la primera región en orden alfabético, sin depender del orden en que se recorran las claves del mapa
@@ -418,7 +418,7 @@ la primera región en orden alfabético, sin depender del orden en que se recorr
 En este caso, $m = 2$, $A=\{\mathrm{Valle},\mathrm{Santander}\}$ y `.min` devuelve `Santander` porque aparece antes 
 que `Valle` en orden alfabético
 
-#### Caso 2: Registro vacío
+##### Caso 2: Registro vacío
 
 Si $r = [\,]$, entonces $\mathrm{Reg}(r)=\varnothing$ y `conteoPorRegion(r)` es `Map()`. Por eso `conteo.isEmpty` 
 es verdadero y la función devuelve `None`, sin evaluar `.max` ni `.min` sobre colecciones vacías
@@ -433,7 +433,7 @@ regionMasActiva(List()) // None
 
 El resultado coincide con el primer caso $f_{\text{activa}}(r)$
 
-#### Caso 3: Registro no vacío
+##### Caso 3: Registro no vacío
 
 Si $r \neq [\,]$, entonces $\mathrm{Reg}(r)\neq\varnothing$. El mapa `conteo` tiene al menos una entrada, por lo que 
 `conteo.values.max` está definido y obtiene:
@@ -444,8 +444,10 @@ $$
 
 La expresión `conteo.keys.filter(region => conteo(region) == mayor)` conserva exactamente las regiones del 
 conjunto $A$, este conjunto no está vacío, porque al menos una región alcanza el máximo $m$. Por lo tanto, `.min` está
-definido y selecciona $g^* = \min A$, la primera alfabéticamente. Finalmente, `Some(...)` devuelve $\mathrm{Some}(g^*)$,
+definido y selecciona $g^{\ast} = \min A$, la primera alfabéticamente. Finalmente, `Some(...)` devuelve $\mathrm{Some}(g^{\ast})$,
 tal como indica $f_{\text{activa}}(r)$.
+
+Por ejemplo, con un registro que contiene solo `Cauca` (3 sismos) y `Huila` (1 sismo):
 
 | Región  | Cantidad de sismos | ¿Cantidad máxima? |
 |---------|--------------------|-------------------|
@@ -455,7 +457,7 @@ tal como indica $f_{\text{activa}}(r)$.
 Como no está vacío siempre existe al menos una región con la cantidad máxima de sismos, por eso `.max` y `.min` 
 pueden operar.
 
-Por lo tanto, la función devuelve $\mathrm{Some}(g^*)$, donde $g^*$ representa la región seleccionada, cumpliendo 
+Por lo tanto, la función devuelve $\mathrm{Some}(g^{\ast})$, donde $g^{\ast}$ representa la región seleccionada, cumpliendo 
 la especificación matemática.
 
 ### Independencia del orden del registro
@@ -484,10 +486,10 @@ y `magnitudMaxima(r)` respectivamente
 - `maximaDe`: Usa `.get(g)` sobre el mismo contenido del mapa de máximas, por lo que devuelve el mismo `Some(valor)`
   o `None`
 
-- `regionMasActiva`: Obtiene el mismo máximo $m$, el mismo conjunto $A$ y la misma región $g^*$, que se selecciona 
+- `regionMasActiva`: Obtiene el mismo máximo $m$, el mismo conjunto $A$ y la misma región $g^{\ast}$, que se selecciona 
   alfabéticamente y no por la posición del sismo
 
-`Ejemplo ilustrativo:`
+**Ejemplo ilustrativo:**
 
 | Posición | Registro original $r$ | Registro reorganizado $r'$ |
 |----------|-----------------------|----------------------------|
@@ -498,7 +500,7 @@ y `magnitudMaxima(r)` respectivamente
 Aunque las posiciones cambian, ambos registros contienen dos sismos de `Valle` y uno de `Choco`; el máximo de `Valle` 
 sigue siendo $5.3$ y de Choco $6.0$, en ambos registros `regionMasActiva` devuelve `Some("Valle")`
 
-En general, para toda la región $g$:
+En general, para toda región $g$:
 
 $$
 \begin{aligned}
