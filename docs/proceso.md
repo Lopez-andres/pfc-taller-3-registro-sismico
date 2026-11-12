@@ -467,7 +467,7 @@ Si la región no está registrada o la lista está vacía, devuelve `None`.
 - `Some(...)`: Devuelve el nombre de la región seleccionada
 
 Esta función identifica la región con mayor cantidad de sismos registrados. Si existen varias regiones con la 
-misma cantidad máxima, selecciona la primera en orden alfabético y, cuando el registro está vacío devuelve `None`.  
+misma cantidad máxima, selecciona la primera en orden alfabético y, cuando el registro está vacío, devuelve `None`.
 
 La condición de `conteo.isEmpty` evita aplicar `.max` a un mapa vacío. Cuando el mapa contiene regiones, siempre 
 existe al menos una con la cantidad máxima, por lo que también puede aplicarse `.min`.
@@ -524,7 +524,7 @@ Si el registro está vacío, `conteoPorRegion(r)` devuelve `Map()` y la condici�
 regionMasActiva(List()) // None
 ```
 
-Por lo tanto, no se ejecutan las operaciones anteriores (`.max`, `.min`, etc.) devolviendo la función `None`.
+Por lo tanto, no se ejecutan las operaciones anteriores (`.max`, `.min`, etc.) y la función devuelve `None`.
 
 ### Diagrama de flujo
 
